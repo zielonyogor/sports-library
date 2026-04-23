@@ -1,6 +1,6 @@
 namespace SportsLibrary
 {
-    public class IContestant
+    public interface IContestant
     {
         public Guid Id { get; }
         public String Name { get; set; }
