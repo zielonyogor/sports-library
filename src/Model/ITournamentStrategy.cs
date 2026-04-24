@@ -2,7 +2,8 @@ namespace SportsLibrary.Model
 {
     public interface ITournamentStrategy
     {
-        public Guid Id { get; }
-        public ITournament NextTournament();
+        List<ITournament> CreateSubTournaments(List<IContestant> contestants);
+        List<ITournament>? CreateNextStage(List<ITournament> completedTournaments);
+        Dictionary<IContestant, IScore> AggregateResults(List<ITournament> tournaments);
     }
 }

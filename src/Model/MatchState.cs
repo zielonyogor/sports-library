@@ -1,10 +1,13 @@
-public enum MatchState
+namespace SportsLibrary.Model
 {
-    Scheduled,
-    InProgress,
-    Pause,
-    Finished,
-    Resheduled,
-    Cancelled,
-    Rejected
+    public enum MatchState
+    {
+        Scheduled,
+        InProgress,
+        Pause,
+        Finished,
+        Rescheduled,
+        Cancelled,
+        Rejected
+    }
 }

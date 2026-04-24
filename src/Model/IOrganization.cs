@@ -1,9 +1,9 @@
 namespace SportsLibrary.Model
 {
-    public interface IContestant
+    public interface IOrganization
     {
         Guid Id { get; }
         string Name { get; set; }
-        IOrganization? Organisation { get; set; }
+        ICollection<IContestant> Members { get; set; }
     }
 }

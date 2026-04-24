@@ -2,7 +2,12 @@ namespace SportsLibrary.Model
 {
     public class MatchSupervisor
     {
-        Guid Id { set; }
-        Person Person { get; set; }
+        public Guid Id { get; } = Guid.NewGuid();
+        public Person Person { get; set; }
+
+        public MatchSupervisor(Person person)
+        {
+            Person = person;
+        }
     }
 }

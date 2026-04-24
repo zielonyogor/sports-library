@@ -1,5 +1,8 @@
-public interface IInGameEvent
+namespace SportsLibrary.Model
 {
-    public DateTime timestamp {get; set;}
-    public IEventPayload GetEvent()
+    public interface IInGameEvent
+    {
+        DateTime Timestamp { get; set; }
+        IEventPayload GetEvent();
+    }
 }

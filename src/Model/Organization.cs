@@ -1,11 +1,14 @@
 namespace SportsLibrary.Model
 {
-    public class Organization
+    public class Organization : IOrganization
     {
-        Guid Id { set; }
-        string Name { get; set; }
+        public Guid Id { get; } = Guid.NewGuid();
+        public string Name { get; set; }
+        public ICollection<IContestant> Members { get; set; } = new List<IContestant>();
 
-        ICollection<IContestant> Members { get; set; }
+        public Organization(string name)
+        {
+            Name = name;
+        }
     }
-    
 }

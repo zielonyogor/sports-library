@@ -1,10 +1,16 @@
-using SportsLibrary.Models;
+using SportsLibrary.Model;
 
 namespace SportsLibrary.FootballClasses
 {
-    public class FootballScore : IScore
+    public enum CardType { Yellow, Red }
+    public enum MatchOutcome { Win, Draw, Lose }
+
+    public class FootballMatchScore : IScore
     {
-        public int goals {get; set;}
-        public Dictionary<String, Int> cards {get; set;}
+        public int GoalsScored { get; set; }
+        public Dictionary<string, CardType> Cards { get; set; } = new();
+        public MatchOutcome Result { get; set; }
+
+        public double GetValue() => GoalsScored;
     }
 }

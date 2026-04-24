@@ -2,9 +2,17 @@ namespace SportsLibrary.Model
 {
     public class Person
     {
-        Guid Id { set; }
-        string Name { get; set; }
-        string Surname { get; set; }
-        DateOnly BirthDate { get; set; }
+        public Guid Id { get; } = Guid.NewGuid();
+        public string Name { get; set; }
+        public string Surname { get; set; }
+        public DateOnly BirthDate { get; set; }
+        public float Weight { get; set; }
+        public float Height { get; set; }
+
+        public Person(string name, string surname)
+        {
+            Name = name;
+            Surname = surname;
+        }
     }
 }

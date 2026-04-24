@@ -2,6 +2,7 @@ namespace SportsLibrary.Model
 {
     public interface IMatchesStrategy
     {
-        public void NextMatch();
+        List<IMatch> CreateMatches(List<IContestant> contestants);
+        List<IMatch>? CreateNextRound(List<IMatch> completedMatches);
     }
 }

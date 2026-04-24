@@ -2,8 +2,11 @@ namespace SportsLibrary.Model
 {
     public class SportClub : Organization
     {
-        Guid Id { set; }
-        string Name { get; set; }
-        CountryCode Country { get; set; }
+        public CountryCode Country { get; set; }
+
+        public SportClub(string name, CountryCode country) : base(name)
+        {
+            Country = country;
+        }
     }
 }

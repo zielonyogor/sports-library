@@ -1,4 +1,4 @@
-namespace SportsLibrary
+namespace SportsLibrary.Model
 {
     public enum CountryCode
     {

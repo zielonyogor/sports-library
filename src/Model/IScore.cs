@@ -1,4 +1,7 @@
-public interface IScore
+namespace SportsLibrary.Model
 {
-    public void GetValue();
+    public interface IScore
+    {
+        double GetValue();
+    }
 }
