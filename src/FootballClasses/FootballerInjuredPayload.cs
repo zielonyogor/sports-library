@@ -4,12 +4,13 @@ namespace SportsLibrary.FootballClasses
 {
     public class FootballerInjuredPayload : IEventPayload
     {
-        public IScore? Score => null;
         /// <summary>The player who was injured.</summary>
         public IContestant? Contestant { get; init; }
-        /// <summary>The official who stopped play.</summary>
+        /// <summary>The referee who stopped play.</summary>
         public MatchSupervisor? Referee { get; init; }
+        /// <summary>Match minute when the injury occurred.</summary>
         public int Minute { get; init; }
+        /// <summary>Additional description of the injury.</summary>
         public string? Description { get; init; }
     }
 }

@@ -7,6 +7,7 @@ namespace SportsLibrary.Model
 
         public InGameEvent(DateTime timestamp, IEventPayload payload)
         {
+            ArgumentNullException.ThrowIfNull(payload);
             Timestamp = timestamp;
             Payload = payload;
         }

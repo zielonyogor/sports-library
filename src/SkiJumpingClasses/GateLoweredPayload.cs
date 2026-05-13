@@ -8,7 +8,6 @@ namespace SportsLibrary.SkiJumpingClasses
     /// </summary>
     public class GateLoweredPayload : IEventPayload
     {
-        public IScore? Score => null;
         /// <summary>Null when the change applies to all remaining jumpers.</summary>
         public IContestant? Contestant { get; init; }
         /// <summary>The technical delegate or gate judge who ordered the change.</summary>

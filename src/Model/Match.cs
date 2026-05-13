@@ -20,5 +20,17 @@ namespace SportsLibrary.Model
             Name = name;
             Contestants = new ObservableCollection<IContestant>(contestants);
         }
+
+        public IScore? GetCurrentScore(IContestant contestant) =>
+            Statistics.TryGetValue(contestant, out var score) ? score : null;
+
+        public IContestant? GetWinner()
+        {
+            if (Statistics.Count == 0) return null;
+            var ranked = Statistics.OrderByDescending(kv => kv.Value.GetValue()).ToList();
+            if (ranked.Count >= 2 && ranked[0].Value.GetValue() == ranked[1].Value.GetValue())
+                return PenaltyWinner;
+            return ranked[0].Key;
+        }
     }
 }
