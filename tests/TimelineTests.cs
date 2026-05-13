@@ -1,6 +1,6 @@
-using SportsLibrary.FootballClasses;
-using SportsLibrary.Model;
-using SportsLibrary.SkiJumpingClasses;
+using SportsLibrary.Football;
+using SportsLibrary.Core;
+using SportsLibrary.SkiJumping;
 
 namespace tests;
 
@@ -245,8 +245,8 @@ public class FootballTimelineTests
     private static IContestant C(string name) =>
         new TeamContestant(name);
 
-    private static MatchSupervisor Ref() =>
-        new MatchSupervisor(new Person("Referee", "Smith"));
+    private static MatchSupervisor R(string name) =>
+        new MatchSupervisor(new Person(name, ""));
 
     [Test]
     public void FootballGoalPayload_ExposesScorer()
@@ -287,6 +287,7 @@ public class FootballTimelineTests
             Contestant = C("Blue"),
             CardType = CardType.Yellow,
             Minute = 55,
+            Referee = R("Referee"),
         };
 
         Assert.That(payload.CardType, Is.EqualTo(CardType.Yellow));
@@ -301,6 +302,7 @@ public class FootballTimelineTests
             Contestant = C("Red"),
             CardType = CardType.Red,
             Minute = 88,
+            Referee = R("Referee")
         };
 
         Assert.That(payload.CardType, Is.EqualTo(CardType.Red));
@@ -311,7 +313,7 @@ public class FootballTimelineTests
     {
         var red = C("Red");
         var blue = C("Blue");
-        var referee = Ref();
+        var referee = R("Referee");
         var match = new Match("Group A", new[] { red, blue });
         var kickOff = new DateTime(2024, 7, 15, 15, 0, 0);
 
@@ -394,11 +396,11 @@ public class FootballTimelineTests
 
         match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(30), new FootballCardPayload
         {
-            Contestant = player, CardType = CardType.Yellow, Minute = 30,
+            Contestant = player, CardType = CardType.Yellow, Minute = 30, Referee = R("Referee"),
         }));
         match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(60), new FootballCardPayload
         {
-            Contestant = player, CardType = CardType.Yellow, Minute = 60,
+            Contestant = player, CardType = CardType.Yellow, Minute = 60, Referee = R("Referee"),
         }));
 
         var yellowCount = new Dictionary<IContestant, int>();
@@ -462,7 +464,7 @@ public class FootballTimelineTests
         match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(35),
             new FootballerInjuredPayload { Contestant = blue, Minute = 35, Description = "Ankle" }));
         match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(45),
-            new FootballCardPayload { Contestant = red, CardType = CardType.Yellow, Minute = 45 }));
+            new FootballCardPayload { Contestant = red, CardType = CardType.Yellow, Minute = 45, Referee = R("Referee") }));
         match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(78),
             new FootballerInjuredPayload { Contestant = red, Minute = 78 }));
 

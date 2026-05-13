@@ -1,6 +1,6 @@
-using SportsLibrary.FootballClasses;
-using SportsLibrary.Model;
-using SportsLibrary.SkiJumpingClasses;
+using SportsLibrary.Football;
+using SportsLibrary.Core;
+using SportsLibrary.SkiJumping;
 
 namespace tests;
 

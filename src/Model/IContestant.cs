@@ -1,9 +1,0 @@
-namespace SportsLibrary.Model
-{
-    public interface IContestant
-    {
-        Guid Id { get; }
-        string Name { get; set; }
-        IOrganization? Organisation { get; set; }
-    }
-}

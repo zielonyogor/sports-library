@@ -17,7 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../src/src.csproj" />
+    <ProjectReference Include="../src/SportsLibrary.Core/SportsLibrary.Core.csproj" />
+    <ProjectReference Include="../src/SportsLibrary.Football/SportsLibrary.Football.csproj" />
+    <ProjectReference Include="../src/SportsLibrary.SkiJumping/SportsLibrary.SkiJumping.csproj" />
   </ItemGroup>
 
   <ItemGroup>

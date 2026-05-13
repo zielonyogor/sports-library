@@ -1,5 +1,5 @@
-using SportsLibrary.FootballClasses;
-using SportsLibrary.Model;
+using SportsLibrary.Football;
+using SportsLibrary.Core;
 
 namespace tests;
 

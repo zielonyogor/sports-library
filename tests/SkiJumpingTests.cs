@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
-using SportsLibrary.Model;
-using SportsLibrary.SkiJumpingClasses;
+using SportsLibrary.Core;
+using SportsLibrary.SkiJumping;
 
 namespace tests;
 
