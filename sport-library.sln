@@ -4,6 +4,8 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{9CF47860-2CEA-F379-09D8-9AEF27965D12}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportsLibrary.Core", "src\SportsLibrary.Core\SportsLibrary.Core.csproj", "{A0B1C2D3-E4F5-6789-0123-456789ABCDEF}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportsLibrary.Football", "src\SportsLibrary.Football\SportsLibrary.Football.csproj", "{B2C3D4E5-F678-9012-3456-789ABCDEF012}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportsLibrary.SkiJumping", "src\SportsLibrary.SkiJumping\SportsLibrary.SkiJumping.csproj", "{C3D4E5F6-7890-1234-5678-9ABCDEF01234}"
@@ -18,6 +20,10 @@ Global
 		{9CF47860-2CEA-F379-09D8-9AEF27965D12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CF47860-2CEA-F379-09D8-9AEF27965D12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CF47860-2CEA-F379-09D8-9AEF27965D12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0B1C2D3-E4F5-6789-0123-456789ABCDEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0B1C2D3-E4F5-6789-0123-456789ABCDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0B1C2D3-E4F5-6789-0123-456789ABCDEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0B1C2D3-E4F5-6789-0123-456789ABCDEF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B2C3D4E5-F678-9012-3456-789ABCDEF012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B2C3D4E5-F678-9012-3456-789ABCDEF012}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2C3D4E5-F678-9012-3456-789ABCDEF012}.Release|Any CPU.ActiveCfg = Release|Any CPU

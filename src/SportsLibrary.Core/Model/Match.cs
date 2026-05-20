@@ -2,6 +2,9 @@ using System.Collections.ObjectModel;
 
 namespace SportsLibrary.Core
 {
+    /// <summary>
+    /// Represents a match between contestants. 
+    /// </summary>
     public class Match : IMatch
     {
         public Guid Id { get; } = Guid.NewGuid();

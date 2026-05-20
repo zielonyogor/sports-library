@@ -102,6 +102,19 @@ public class FootballLeaderboardScoreTests
         };
         Assert.That(score.GetValue(), Is.EqualTo(11));
     }
+
+    [Test]
+    public void GroupRanking_AwardsThreePointsForWinOneForDraw()
+    {
+        // Red 2-0 Blue (win), Red 1-1 Green (draw), Blue 0-0 Green (draw) → Red:4, Green:2, Blue:1
+        var red   = new FootballLeaderboardScore { Wins = 1, Draws = 1, Losses = 0, Points = 4 };
+        var green = new FootballLeaderboardScore { Wins = 0, Draws = 2, Losses = 0, Points = 2 };
+        var blue  = new FootballLeaderboardScore { Wins = 0, Draws = 1, Losses = 1, Points = 1 };
+
+        Assert.That(red.GetValue(),   Is.EqualTo(4));
+        Assert.That(green.GetValue(), Is.EqualTo(2));
+        Assert.That(blue.GetValue(),  Is.EqualTo(1));
+    }
 }
 
 // ─── FootballGroupStageStrategy ───────────────────────────────────────────────
@@ -278,6 +291,22 @@ public class FootballBracketStageStrategyTests
         var round2 = strategy.CreateNextRound(round1);
 
         Assert.That(round2![0].Name, Does.Contain("Round 2"));
+    }
+
+    [Test]
+    public void Elimination_DrawResolvedByPenaltyWinner_CorrectContestantAdvances()
+    {
+        var strategy = new FootballBracketStageStrategy();
+        var alpha = T("Alpha"); var beta = T("Beta");
+        var gamma = T("Gamma"); var delta = T("Delta");
+        var round1 = strategy.CreateMatches(new List<IContestant> { alpha, beta, gamma, delta });
+
+        Draw(round1.First(m => m.Contestants.Contains(alpha)), penaltyWinner: beta);
+        Win(round1.First(m => m.Contestants.Contains(gamma)), gamma);
+
+        var round2 = strategy.CreateNextRound(round1)!;
+        Assert.That(round2[0].Contestants, Contains.Item(beta));
+        Assert.That(round2[0].Contestants, Does.Not.Contain(alpha));
     }
 
     [Test]

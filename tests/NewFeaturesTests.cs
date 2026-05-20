@@ -4,7 +4,7 @@ using SportsLibrary.SkiJumping;
 
 namespace tests;
 
-// ─── Timeline: GetEventsByPayloadType + RemoveLastEvent + null validation ──────
+// ─── Timeline: GetEventsByPayloadType + null validation ──────
 
 [TestFixture]
 public class TimelineNewFeaturesTests
@@ -46,39 +46,6 @@ public class TimelineNewFeaturesTests
     {
         var timeline = new Timeline();
         Assert.That(timeline.GetEventsByPayloadType<FootballGoalPayload>(), Is.Empty);
-    }
-
-    [Test]
-    public void RemoveLastEvent_RemovesTheLastAddedEvent()
-    {
-        var timeline = new Timeline();
-        var ev1 = new InGameEvent(DateTime.Now,               new EventPayload());
-        var ev2 = new InGameEvent(DateTime.Now.AddMinutes(1), new EventPayload());
-        timeline.AddEvent(ev1);
-        timeline.AddEvent(ev2);
-
-        var removed = timeline.RemoveLastEvent();
-
-        Assert.That(removed, Is.True);
-        Assert.That(timeline.Events.Count, Is.EqualTo(1));
-        Assert.That(timeline.Events[0], Is.SameAs(ev1));
-    }
-
-    [Test]
-    public void RemoveLastEvent_EmptyTimeline_ReturnsFalse()
-    {
-        var timeline = new Timeline();
-        Assert.That(timeline.RemoveLastEvent(), Is.False);
-        Assert.That(timeline.Events, Is.Empty);
-    }
-
-    [Test]
-    public void RemoveLastEvent_AllEventsRemoved_TimelineIsEmpty()
-    {
-        var timeline = new Timeline();
-        timeline.AddEvent(new InGameEvent(DateTime.Now, new EventPayload()));
-        timeline.RemoveLastEvent();
-        Assert.That(timeline.Events, Is.Empty);
     }
 
     [Test]

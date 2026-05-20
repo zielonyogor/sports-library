@@ -115,6 +115,28 @@ public class FourHillsStrategyTests
     }
 
     [Test]
+    public void AggregateResults_UsesTotalAcrossRoundsToSelectWinner()
+    {
+        var strategy = new FourHillsStrategy(new DefaultRandomProvider());
+        var contestants = H.Cs("Kamil", "Dawid", "Stefan");
+        var kamil = contestants[0]; var dawid = contestants[1]; var stefan = contestants[2];
+        var hills = strategy.CreateSubTournaments(contestants);
+
+        // Round 1: Kamil 181.4, Dawid 181.2, Stefan 179.2
+        hills[0].TournamentResults[kamil]  = new SkiJumpingScore(126.5f, 56.0f, -2.1f, 1.0f);
+        hills[0].TournamentResults[dawid]  = new SkiJumpingScore(125.0f, 55.5f,  0.4f, 0.3f);
+        hills[0].TournamentResults[stefan] = new SkiJumpingScore(124.0f, 55.0f,  0.2f, 0.0f);
+        // Round 2: Kamil 178.7, Dawid 185.2, Stefan 178.1 → Dawid wins aggregate (366.4 vs 360.1)
+        hills[1].TournamentResults[kamil]  = new SkiJumpingScore(125.0f, 55.0f, -2.0f, 0.7f);
+        hills[1].TournamentResults[dawid]  = new SkiJumpingScore(127.5f, 56.0f,  1.2f, 0.5f);
+        hills[1].TournamentResults[stefan] = new SkiJumpingScore(123.5f, 54.5f,  0.1f, 0.0f);
+
+        var results = strategy.AggregateResults(new List<ITournament> { hills[0], hills[1] });
+        var winner = results.OrderByDescending(kv => kv.Value.GetValue()).First().Key;
+        Assert.That(winner.Name, Is.EqualTo("Dawid"));
+    }
+
+    [Test]
     public void AggregateResults_PartialParticipation_OnlyCompletedHillsCountedInTotal()
     {
         // Peter completes all 4 hills; Andreas skips Innsbruck (no result entry).
