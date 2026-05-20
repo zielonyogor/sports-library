@@ -16,6 +16,12 @@ namespace SportsLibrary.SkiJumping
             _random = random;
         }
 
+        /// <summary>
+        /// Pairs contestants into duels. 
+        /// If the number of contestants is odd, one contestant will be left without a match and will be automatically advanced to the next round.
+        /// </summary>
+        /// <param name="contestants">The list of contestants to be paired into duels.</param>
+        /// <returns>A list of matches created from the contestants.</returns>
         public List<IMatch> CreateMatches(List<IContestant> contestants)
         {
             _finalCreated = false;
@@ -26,6 +32,11 @@ namespace SportsLibrary.SkiJumping
             return matches;
         }
 
+        /// <summary>
+        /// Creates the next round of matches based on the results of the completed matches.
+        /// </summary>
+        /// <param name="completedMatches">The list of completed matches.</param>
+        /// <returns>A list of matches for the next round, or null if the final has already been created.</returns>
         public List<IMatch>? CreateNextRound(List<IMatch> completedMatches)
         {
             if (_finalCreated) return null;
@@ -44,6 +55,7 @@ namespace SportsLibrary.SkiJumping
                 if (ranked.Count >= 2) losers.Add((ranked[1].c, ranked[1].Item2));
             }
 
+            // lucky losers advance as well
             var top5Losers = losers
                 .OrderByDescending(x => x.Score)
                 .Take(5)
