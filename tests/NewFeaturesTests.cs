@@ -81,19 +81,21 @@ public class MatchWinnerTests
     }
 
     [Test]
-    public void GetWinner_TiedScore_ReturnsPenaltyWinner()
+    public void GetWinner_TiedScore_WithDrawStrategy_ReturnsShootoutWinner()
     {
         var red = T("Red"); var blue = T("Blue");
         var match = new Match("Test", new[] { red, blue });
         match.Statistics[red]  = new FootballMatchScore { GoalsScored = 2 };
         match.Statistics[blue] = new FootballMatchScore { GoalsScored = 2 };
-        match.PenaltyWinner = blue;
+        var t = DateTime.Now;
+        match.Timeline.AddEvent(new InGameEvent(t,               new FootballPenaltyPayload { Contestant = blue, Scored = true  }));
+        match.Timeline.AddEvent(new InGameEvent(t.AddSeconds(30), new FootballPenaltyPayload { Contestant = red,  Scored = false }));
 
-        Assert.That(match.GetWinner(), Is.SameAs(blue));
+        Assert.That(match.GetWinner(new FootballPenaltyShootoutResultStrategy()), Is.SameAs(blue));
     }
 
     [Test]
-    public void GetWinner_TiedWithNoPenaltyWinner_ReturnsNull()
+    public void GetWinner_TiedScoreNoStrategy_ReturnsNull()
     {
         var red = T("Red"); var blue = T("Blue");
         var match = new Match("Test", new[] { red, blue });

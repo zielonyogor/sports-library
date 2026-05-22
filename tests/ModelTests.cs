@@ -287,22 +287,6 @@ public class MatchTests
     }
 
     [Test]
-    public void PenaltyWinner_NullByDefault()
-    {
-        var m = new Match("M", new[] { C("A"), C("B") });
-        Assert.That(m.PenaltyWinner, Is.Null);
-    }
-
-    [Test]
-    public void PenaltyWinner_CanBeAssigned()
-    {
-        var b = C("B");
-        var m = new Match("M", new[] { C("A"), b });
-        m.PenaltyWinner = b;
-        Assert.That(m.PenaltyWinner, Is.SameAs(b));
-    }
-
-    [Test]
     public void Timeline_NotNullByDefault()
     {
         var m = new Match("M", new[] { C("A") });

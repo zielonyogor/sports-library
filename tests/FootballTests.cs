@@ -206,7 +206,10 @@ public class FootballBracketStageStrategyTests
     {
         foreach (var c in match.Contestants)
             match.Statistics[c] = new FootballMatchScore { GoalsScored = 1, Result = MatchOutcome.Draw };
-        ((Match)match).PenaltyWinner = penaltyWinner;
+        var loser = match.Contestants.First(c => c != penaltyWinner);
+        var t = DateTime.Now;
+        match.Timeline.AddEvent(new InGameEvent(t,               new FootballPenaltyPayload { Contestant = penaltyWinner, Scored = true  }));
+        match.Timeline.AddEvent(new InGameEvent(t.AddSeconds(30), new FootballPenaltyPayload { Contestant = loser,         Scored = false }));
     }
 
     [Test]
@@ -254,9 +257,9 @@ public class FootballBracketStageStrategyTests
     }
 
     [Test]
-    public void CreateNextRound_DrawResolvedByPenaltyWinner_CorrectTeamAdvances()
+    public void CreateNextRound_DrawResolvedByShootout_CorrectTeamAdvances()
     {
-        var strategy = new FootballBracketStageStrategy();
+        var strategy = new FootballBracketStageStrategy(new FootballPenaltyShootoutResultStrategy());
         var red = T("Red"); var blue = T("Blue"); var green = T("Green"); var yellow = T("Yellow");
         var round1 = strategy.CreateMatches(new List<IContestant> { red, blue, green, yellow });
 
@@ -294,9 +297,9 @@ public class FootballBracketStageStrategyTests
     }
 
     [Test]
-    public void Elimination_DrawResolvedByPenaltyWinner_CorrectContestantAdvances()
+    public void Elimination_DrawResolvedByShootout_CorrectContestantAdvances()
     {
-        var strategy = new FootballBracketStageStrategy();
+        var strategy = new FootballBracketStageStrategy(new FootballPenaltyShootoutResultStrategy());
         var alpha = T("Alpha"); var beta = T("Beta");
         var gamma = T("Gamma"); var delta = T("Delta");
         var round1 = strategy.CreateMatches(new List<IContestant> { alpha, beta, gamma, delta });

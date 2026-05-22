@@ -2,10 +2,16 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.Football
 {
-    /// <summary>Single-elimination bracket. Draws resolved by PenaltyWinner on the concrete Match.</summary>
+    /// <summary>Single-elimination bracket. Draws resolved by an optional <see cref="IMatchResultStrategy"/>.</summary>
     public class FootballBracketStageStrategy : IMatchesStrategy
     {
+        private readonly IMatchResultStrategy? _drawResultStrategy;
         private int _roundNumber;
+
+        public FootballBracketStageStrategy(IMatchResultStrategy? drawResultStrategy = null)
+        {
+            _drawResultStrategy = drawResultStrategy;
+        }
 
         public List<IMatch> CreateMatches(List<IContestant> contestants)
         {
@@ -38,7 +44,7 @@ namespace SportsLibrary.Football
             return matches;
         }
 
-        private static IContestant? GetMatchWinner(IMatch match)
+        private IContestant? GetMatchWinner(IMatch match)
         {
             var scored = match.Contestants
                 .Select(c => (c, match.Statistics.TryGetValue(c, out var s) ? s.GetValue() : 0d))
@@ -48,10 +54,7 @@ namespace SportsLibrary.Football
             if (scored.Count < 2) return scored.FirstOrDefault().c;
 
             if (scored[0].Item2 == scored[1].Item2)
-            {
-                // Draw — check for a penalty winner on the concrete Match type
-                return match is Match m ? m.PenaltyWinner : scored[0].c;
-            }
+                return _drawResultStrategy?.DetermineWinner(match);
 
             return scored[0].c;
         }
