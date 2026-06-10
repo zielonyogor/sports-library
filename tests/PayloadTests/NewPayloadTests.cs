@@ -15,16 +15,16 @@ public class NewPayloadTests
     [Test]
     public void FootballSubstitutionPayload_ExposesPlayersAndMinute()
     {
-        var playerOn = T("Sub");
+        var playerIn = T("Sub");
         var playerOff = T("Starter");
         var payload = new FootballSubstitutionPayload
         {
-            Contestant = playerOn,
+            PlayerIn = playerIn,
             PlayerOff = playerOff,
             Minute = 65,
         };
 
-        Assert.That(payload.Contestant, Is.SameAs(playerOn));
+        Assert.That(payload.PlayerIn, Is.SameAs(playerIn));
         Assert.That(payload.PlayerOff, Is.SameAs(playerOff));
         Assert.That(payload.Minute, Is.EqualTo(65));
     }
