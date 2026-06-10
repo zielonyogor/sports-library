@@ -1,6 +1,6 @@
 namespace SportsLibrary.Core
 {
-    public class MultiTournament : ITournament
+    public sealed class MultiTournament : ITournament
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; set; }

@@ -3,7 +3,7 @@ namespace SportsLibrary.Core
     /// <summary>
     /// Represents a team contestant, which consists of multiple members (persons) and is associated with an optional organization.
     /// </summary>
-    public class TeamContestant : IContestant
+    public sealed class TeamContestant : IContestant
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; set; }

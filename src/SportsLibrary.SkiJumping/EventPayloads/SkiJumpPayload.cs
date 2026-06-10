@@ -2,7 +2,7 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.SkiJumping
 {
-    public class SkiJumpPayload : IEventPayload
+    public sealed class SkiJumpPayload : IEventPayload
     {
         public IScore? Score { get; init; }
         public IContestant? Contestant { get; init; }

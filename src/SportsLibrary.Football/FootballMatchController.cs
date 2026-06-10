@@ -2,7 +2,7 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.Football
 {
-    public class FootballMatchController(Match match)
+    public sealed class FootballMatchController(Match match)
     {
         public int GetGoalCount(IContestant team) =>
             match.Timeline.GetEventsByPayloadType<FootballGoalPayload>()

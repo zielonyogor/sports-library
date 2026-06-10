@@ -2,7 +2,7 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.Football
 {
-    public class FootballLeaderboardScore : IScore
+    public sealed class FootballLeaderboardScore : IScore
     {
         public int Rank { get; set; }
         public int Wins { get; set; }

@@ -6,7 +6,7 @@ namespace SportsLibrary.SkiJumping
     /// Pairs 50 contestants into 25 1v1 duels. After all duels finish, creates one final
     /// with 25 winners plus the 5 highest-scoring losers.
     /// </summary>
-    public class SkiJumpingDuelStrategy : IMatchesStrategy
+    public sealed class SkiJumpingDuelStrategy : IMatchesStrategy
     {
         private readonly IRandomProvider _random;
         private bool _finalCreated;

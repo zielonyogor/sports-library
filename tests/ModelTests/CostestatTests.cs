@@ -83,7 +83,7 @@ public class ContestantTests
     public void TeamContestant_Organisation_CanBeAssigned()
     {
         var team = new TeamContestant("Team A");
-        var country = new Country("Poland");
+        var country = new Country("Poland", CountryCode.Poland);
         team.Organisation = country;
         Assert.That(team.Organisation, Is.SameAs(country));
     }

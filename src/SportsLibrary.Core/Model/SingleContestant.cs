@@ -1,6 +1,6 @@
 namespace SportsLibrary.Core
 {
-    public class SingleContestant : IContestant
+    public sealed class SingleContestant : IContestant
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; set; }

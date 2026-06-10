@@ -6,7 +6,7 @@ namespace SportsLibrary.SkiJumping
     /// Creates four hill SingleTournaments (Oberstdorf, Garmisch-Partenkirchen, Innsbruck,
     /// Bischofshofen). Final results are the aggregate SkiJumpingScore across all four hills.
     /// </summary>
-    public class FourHillsStrategy : ITournamentStrategy
+    public sealed class FourHillsStrategy : ITournamentStrategy
     {
         private static readonly string[] HillNames =
         {

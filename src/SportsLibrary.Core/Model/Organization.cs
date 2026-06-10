@@ -4,7 +4,7 @@ namespace SportsLibrary.Core
     /// Represents an organization, which can be associated with members (contestants). 
     /// Each organization has a unique identifier and a name.
     /// </summary>
-    public class Organization : IOrganization
+    public abstract class Organization : IOrganization
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; set; }

@@ -1,6 +1,6 @@
 namespace SportsLibrary.Core
 {
-    public class InGameEvent : IInGameEvent
+    public sealed class InGameEvent : IInGameEvent
     {
         public DateTime Timestamp { get; set; }
         public IEventPayload Payload { get; }

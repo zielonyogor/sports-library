@@ -3,9 +3,13 @@ namespace SportsLibrary.Core
     /// <summary>
     /// Represents a country, which is a specific type of organization.
     /// </summary>
-    public class Country : Organization
+    public sealed class Country : Organization
     {
-        public Country(string name) : base(name) { }
+        public CountryCode Code { get; }
+        public Country(string name, CountryCode code) : base(name)
+        {
+            Code = code;
+        }
 
         // any additional properties or methods specific to Country could be added here
     }

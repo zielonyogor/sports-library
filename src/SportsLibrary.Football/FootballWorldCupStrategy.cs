@@ -2,7 +2,7 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.Football
 {
-    public class FootballWorldCupStrategy : ITournamentStrategy
+    public sealed class FootballWorldCupStrategy : ITournamentStrategy
     {
         private const int GroupCount = 8;
         private const int TeamsPerGroup = 4;

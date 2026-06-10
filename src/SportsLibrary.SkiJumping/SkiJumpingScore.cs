@@ -2,7 +2,7 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.SkiJumping
 {
-    public class SkiJumpingScore : IScore
+    public sealed class SkiJumpingScore : IScore
     {
         public float DistancePoints { get; set; }
         public float StylePoints { get; set; }

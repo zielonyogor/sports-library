@@ -3,7 +3,7 @@ using SportsLibrary.Core;
 namespace SportsLibrary.Football
 {
     /// <summary>Single-elimination bracket. Draws resolved by PenaltyWinner on the concrete Match.</summary>
-    public class FootballBracketStageStrategy : IMatchesStrategy
+    public sealed class FootballBracketStageStrategy : IMatchesStrategy
     {
         private int _roundNumber;
 

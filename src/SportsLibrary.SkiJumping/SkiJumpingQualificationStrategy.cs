@@ -5,7 +5,7 @@ namespace SportsLibrary.SkiJumping
     /// <summary>
     /// All contestants compete in one qualification match; top 30 advance to a finals match.
     /// </summary>
-    public class SkiJumpingQualificationStrategy : IMatchesStrategy
+    public sealed class SkiJumpingQualificationStrategy : IMatchesStrategy
     {
         private bool _finalCreated;
 

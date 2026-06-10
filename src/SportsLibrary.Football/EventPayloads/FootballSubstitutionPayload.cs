@@ -2,7 +2,7 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.Football
 {
-    public class FootballSubstitutionPayload : IEventPayload
+    public sealed class FootballSubstitutionPayload : IEventPayload
     {
         /// <summary>The player coming on.</summary>
         public IContestant? PlayerIn { get; init; }

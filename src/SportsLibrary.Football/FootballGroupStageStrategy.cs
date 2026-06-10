@@ -3,7 +3,7 @@ using SportsLibrary.Core;
 namespace SportsLibrary.Football
 {
     /// <summary>Round-robin: every team plays every other team once.</summary>
-    public class FootballGroupStageStrategy : IMatchesStrategy
+    public sealed class FootballGroupStageStrategy : IMatchesStrategy
     {
         public List<IMatch> CreateMatches(List<IContestant> contestants)
         {
