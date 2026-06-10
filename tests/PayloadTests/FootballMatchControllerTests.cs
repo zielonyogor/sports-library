@@ -78,10 +78,10 @@ public class FootballMatchControllerTests
     {
         var red = T("Red");
         var match = new Match("Test", new[] { red });
-        var playerOn = T("Sub");
+        var playerIn = T("Sub");
         var playerOff = T("Starter");
         match.Timeline.AddEvent(new InGameEvent(DateTime.Now,
-            new FootballSubstitutionPayload { Contestant = playerOn, PlayerOff = playerOff, Minute = 65 }));
+            new FootballSubstitutionPayload { PlayerIn = playerIn, PlayerOff = playerOff, Minute = 65 }));
 
         var subs = new FootballMatchController(match).GetSubstitutions();
 
