@@ -11,13 +11,13 @@ namespace SportsLibrary.Core
         /// </summary>
         /// <param name="contestants">The list of contestants to be paired into matches.</param>
         /// <returns>A list of matches created from the contestants.</returns>
-        List<IMatch> CreateMatches(List<IContestant> contestants);
-        
+        IReadOnlyList<IMatch> CreateMatches(IReadOnlyList<IContestant> contestants);
+
         /// <summary>
         /// Creates the next round of matches based on the results of the completed matches.
         /// </summary>
         /// <param name="completedMatches">The list of completed matches.</param>
         /// <returns>A list of matches for the next round, or null if the final has already been created.</returns>
-        List<IMatch>? CreateNextRound(List<IMatch> completedMatches);
+        IReadOnlyList<IMatch>? CreateNextRound(IReadOnlyList<IMatch> completedMatches);
     }
 }

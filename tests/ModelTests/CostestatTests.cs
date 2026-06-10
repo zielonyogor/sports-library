@@ -68,7 +68,7 @@ public class ContestantTests
     {
         var team = new TeamContestant("Team A");
         var player = new Person("Jan", "Nowak");
-        team.Members.Add(player);
+        team.AddMember(player);
         Assert.That(team.Members, Contains.Item(player));
     }
 

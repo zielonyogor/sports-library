@@ -7,13 +7,13 @@ namespace SportsLibrary.Football
     {
         private int _roundNumber;
 
-        public List<IMatch> CreateMatches(List<IContestant> contestants)
+        public IReadOnlyList<IMatch> CreateMatches(IReadOnlyList<IContestant> contestants)
         {
             _roundNumber = 1;
             return CreateRoundMatches(contestants);
         }
 
-        public List<IMatch>? CreateNextRound(List<IMatch> completedMatches)
+        public IReadOnlyList<IMatch>? CreateNextRound(IReadOnlyList<IMatch> completedMatches)
         {
             var winners = completedMatches
                 .Select(GetMatchWinner)
@@ -27,7 +27,7 @@ namespace SportsLibrary.Football
             return CreateRoundMatches(winners);
         }
 
-        private List<IMatch> CreateRoundMatches(List<IContestant> contestants)
+        private List<IMatch> CreateRoundMatches(IReadOnlyList<IContestant> contestants)
         {
             var matches = new List<IMatch>();
             for (int i = 0; i + 1 < contestants.Count; i += 2)

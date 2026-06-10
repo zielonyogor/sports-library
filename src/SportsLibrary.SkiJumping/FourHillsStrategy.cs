@@ -23,19 +23,16 @@ namespace SportsLibrary.SkiJumping
             _random = random;
         }
 
-        public List<ITournament> CreateSubTournaments(List<IContestant> contestants)
+        public IReadOnlyList<ITournament> CreateSubTournaments(IReadOnlyList<IContestant> contestants)
         {
-            return HillNames.Select(name =>
-            {
-                var t = new SingleTournament(name, new SkiJumpingDuelStrategy(_random));
-                t.Contestants.AddRange(contestants);
-                return (ITournament)t;
-            }).ToList();
+            return HillNames
+                .Select(name => (ITournament)new SingleTournament(name, new SkiJumpingDuelStrategy(_random), contestants))
+                .ToList();
         }
 
-        public List<ITournament>? CreateNextStage(List<ITournament> completedTournaments) => null;
+        public IReadOnlyList<ITournament>? CreateNextStage(IReadOnlyList<ITournament> completedTournaments) => null;
 
-        public Dictionary<IContestant, IScore> AggregateResults(List<ITournament> tournaments)
+        public IReadOnlyDictionary<IContestant, IScore> AggregateResults(IReadOnlyList<ITournament> tournaments)
         {
             var totals = new Dictionary<IContestant, double>();
 

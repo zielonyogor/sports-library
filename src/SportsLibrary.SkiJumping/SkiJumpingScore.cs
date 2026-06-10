@@ -4,10 +4,10 @@ namespace SportsLibrary.SkiJumping
 {
     public sealed class SkiJumpingScore : IScore
     {
-        public float DistancePoints { get; set; }
-        public float StylePoints { get; set; }
-        public float WindCompensation { get; set; }
-        public float GateCompensation { get; set; }
+        public float DistancePoints { get; }
+        public float StylePoints { get; }
+        public float WindCompensation { get; }
+        public float GateCompensation { get; }
 
         public float Points => DistancePoints + StylePoints + WindCompensation + GateCompensation;
 

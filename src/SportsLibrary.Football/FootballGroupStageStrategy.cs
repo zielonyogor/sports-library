@@ -5,7 +5,7 @@ namespace SportsLibrary.Football
     /// <summary>Round-robin: every team plays every other team once.</summary>
     public sealed class FootballGroupStageStrategy : IMatchesStrategy
     {
-        public List<IMatch> CreateMatches(List<IContestant> contestants)
+        public IReadOnlyList<IMatch> CreateMatches(IReadOnlyList<IContestant> contestants)
         {
             var matches = new List<IMatch>();
             int matchNum = 1;
@@ -19,6 +19,6 @@ namespace SportsLibrary.Football
             return matches;
         }
 
-        public List<IMatch>? CreateNextRound(List<IMatch> completedMatches) => null;
+        public IReadOnlyList<IMatch>? CreateNextRound(IReadOnlyList<IMatch> completedMatches) => null;
     }
 }

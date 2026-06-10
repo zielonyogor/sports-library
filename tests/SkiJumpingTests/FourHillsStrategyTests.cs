@@ -59,8 +59,8 @@ public class FourHillsStrategyTests
         float[] dPts = { 90, 110, 100, 100 };
         for (int i = 0; i < 4; i++)
         {
-            hills[i].TournamentResults[kamil] = H.Pts(kPts[i]);
-            hills[i].TournamentResults[dawid] = H.Pts(dPts[i]);
+            hills[i].SetResult(kamil, H.Pts(kPts[i]));
+            hills[i].SetResult(dawid, H.Pts(dPts[i]));
         }
 
         var results = strategy.AggregateResults(hills);
@@ -84,8 +84,8 @@ public class FourHillsStrategyTests
         float[] tPts = { 100, 100, 100, 200 };
         for (int i = 0; i < 4; i++)
         {
-            hills[i].TournamentResults[stefan] = H.Pts(sPts[i]);
-            hills[i].TournamentResults[thomas] = H.Pts(tPts[i]);
+            hills[i].SetResult(stefan, H.Pts(sPts[i]));
+            hills[i].SetResult(thomas, H.Pts(tPts[i]));
         }
 
         var results = strategy.AggregateResults(hills);
@@ -104,13 +104,13 @@ public class FourHillsStrategyTests
         var hills = strategy.CreateSubTournaments(contestants);
 
         // Round 1: Kamil 181.4, Dawid 181.2, Stefan 179.2
-        hills[0].TournamentResults[kamil] = new SkiJumpingScore(126.5f, 56.0f, -2.1f, 1.0f);
-        hills[0].TournamentResults[dawid] = new SkiJumpingScore(125.0f, 55.5f, 0.4f, 0.3f);
-        hills[0].TournamentResults[stefan] = new SkiJumpingScore(124.0f, 55.0f, 0.2f, 0.0f);
+        hills[0].SetResult(kamil, new SkiJumpingScore(126.5f, 56.0f, -2.1f, 1.0f));
+        hills[0].SetResult(dawid, new SkiJumpingScore(125.0f, 55.5f, 0.4f, 0.3f));
+        hills[0].SetResult(stefan, new SkiJumpingScore(124.0f, 55.0f, 0.2f, 0.0f));
         // Round 2: Kamil 178.7, Dawid 185.2, Stefan 178.1 → Dawid wins aggregate (366.4 vs 360.1)
-        hills[1].TournamentResults[kamil] = new SkiJumpingScore(125.0f, 55.0f, -2.0f, 0.7f);
-        hills[1].TournamentResults[dawid] = new SkiJumpingScore(127.5f, 56.0f, 1.2f, 0.5f);
-        hills[1].TournamentResults[stefan] = new SkiJumpingScore(123.5f, 54.5f, 0.1f, 0.0f);
+        hills[1].SetResult(kamil, new SkiJumpingScore(125.0f, 55.0f, -2.0f, 0.7f));
+        hills[1].SetResult(dawid, new SkiJumpingScore(127.5f, 56.0f, 1.2f, 0.5f));
+        hills[1].SetResult(stefan, new SkiJumpingScore(123.5f, 54.5f, 0.1f, 0.0f));
 
         var results = strategy.AggregateResults(new List<ITournament> { hills[0], hills[1] });
         var winner = results.OrderByDescending(kv => kv.Value.GetValue()).First().Key;
@@ -128,12 +128,12 @@ public class FourHillsStrategyTests
         var hills = strategy.CreateSubTournaments(contestants);
 
         for (int i = 0; i < 4; i++)
-            hills[i].TournamentResults[peter] = H.Pts(100f);
+            hills[i].SetResult(peter, H.Pts(100f));
 
         // Andreas has no result for hill 2 (index 2 = Innsbruck)
-        hills[0].TournamentResults[andreas] = H.Pts(200f);
-        hills[1].TournamentResults[andreas] = H.Pts(200f);
-        hills[3].TournamentResults[andreas] = H.Pts(200f);
+        hills[0].SetResult(andreas, H.Pts(200f));
+        hills[1].SetResult(andreas, H.Pts(200f));
+        hills[3].SetResult(andreas, H.Pts(200f));
 
         var results = strategy.AggregateResults(hills);
 

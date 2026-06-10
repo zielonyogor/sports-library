@@ -9,13 +9,13 @@ namespace SportsLibrary.SkiJumping
     {
         private bool _finalCreated;
 
-        public List<IMatch> CreateMatches(List<IContestant> contestants)
+        public IReadOnlyList<IMatch> CreateMatches(IReadOnlyList<IContestant> contestants)
         {
             _finalCreated = false;
             return new List<IMatch> { new Match("Qualification", contestants) };
         }
 
-        public List<IMatch>? CreateNextRound(List<IMatch> completedMatches)
+        public IReadOnlyList<IMatch>? CreateNextRound(IReadOnlyList<IMatch> completedMatches)
         {
             if (_finalCreated) return null;
 

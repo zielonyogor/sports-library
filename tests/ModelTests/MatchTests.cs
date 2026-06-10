@@ -64,8 +64,8 @@ public class MatchTests
     {
         var a = C("A");
         var m = new Match("M", new[] { a });
-        var score = new FootballMatchScore { GoalsScored = 2 };
-        m.Statistics[a] = score;
+        var score = new FootballMatchScore(goalsScored: 2);
+        m.SetScore(a, score);
         Assert.That(m.Statistics[a], Is.SameAs(score));
     }
 
@@ -81,7 +81,7 @@ public class MatchTests
     {
         var b = C("B");
         var m = new Match("M", new[] { C("A"), b });
-        m.PenaltyWinner = b;
+        m.AssignPenaltyWinner(b);
         Assert.That(m.PenaltyWinner, Is.SameAs(b));
     }
 

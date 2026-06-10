@@ -31,7 +31,7 @@ public class SkiJumpingQualificationStrategyTests
 
         // A01–A20 score low (50), A21–A50 score high (200)
         foreach (var c in contestants)
-            matches[0].Statistics[c] = H.Pts(H.Idx(c) <= 20 ? 50f : 200f);
+            matches[0].SetScore(c, H.Pts(H.Idx(c) <= 20 ? 50f : 200f));
 
         var finals = strategy.CreateNextRound(matches);
 
@@ -54,7 +54,7 @@ public class SkiJumpingQualificationStrategyTests
 
         // Each athlete has a unique score equal to their index
         foreach (var c in contestants)
-            matches[0].Statistics[c] = H.Pts(H.Idx(c));
+            matches[0].SetScore(c, H.Pts(H.Idx(c)));
 
         var finals = strategy.CreateNextRound(matches);
 

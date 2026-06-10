@@ -22,7 +22,7 @@ public class FootballTimelineTests
         var payload = new FootballGoalPayload
         {
             Contestant = red,
-            Score = new FootballMatchScore { GoalsScored = 1, Result = MatchOutcome.Win },
+            Score = new FootballMatchScore(1, MatchOutcome.Win),
             Minute = 35,
         };
 
@@ -90,7 +90,7 @@ public class FootballTimelineTests
             Contestant = red,
             Minute = 22,
             Referee = referee,
-            Score = new FootballMatchScore { GoalsScored = 1, Result = MatchOutcome.Win },
+            Score = new FootballMatchScore(1, MatchOutcome.Win),
         }));
         match.Timeline.AddEvent(new InGameEvent(kickOff.AddMinutes(88), new FootballCardPayload
         {
@@ -111,7 +111,7 @@ public class FootballTimelineTests
             Contestant = blue,
             Minute = 67,
             Referee = referee,
-            Score = new FootballMatchScore { GoalsScored = 1, Result = MatchOutcome.Draw },
+            Score = new FootballMatchScore(1, MatchOutcome.Draw),
         }));
 
         var log = new List<(int minute, string type, string team)>();

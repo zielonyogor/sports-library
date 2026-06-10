@@ -34,7 +34,7 @@ public class OrganizationTests
     {
         var org = new Country("Poland", CountryCode.Poland);
         var member = new SingleContestant("Athlete", new Person("A", "B"));
-        org.Members.Add(member);
+        org.AddMember(member);
         Assert.That(org.Members, Contains.Item(member));
     }
 

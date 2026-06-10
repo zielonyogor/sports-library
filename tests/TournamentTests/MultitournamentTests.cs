@@ -1,4 +1,4 @@
-﻿using SportsLibrary.Football;
+using SportsLibrary.Football;
 using SportsLibrary.Core;
 using SportsLibrary.SkiJumping;
 
@@ -39,8 +39,7 @@ public class MultiTournamentTests
     [Test]
     public void TournamentResults_EmptyBeforeEnd()
     {
-        var mt = new MultiTournament("MT", new FourHillsStrategy(new DefaultRandomProvider()));
-        mt.Contestants.AddRange(Teams(4));
+        var mt = new MultiTournament("MT", new FourHillsStrategy(new DefaultRandomProvider()), Teams(4));
         mt.Start();
         Assert.That(mt.TournamentResults, Is.Empty);
     }
@@ -48,8 +47,7 @@ public class MultiTournamentTests
     [Test]
     public void Start_FourHills_Creates4SubTournaments()
     {
-        var mt = new MultiTournament("Four Hills", new FourHillsStrategy(new DefaultRandomProvider(seed: 1)));
-        mt.Contestants.AddRange(Teams(50));
+        var mt = new MultiTournament("Four Hills", new FourHillsStrategy(new DefaultRandomProvider(seed: 1)), Teams(50));
         mt.Start();
         Assert.That(mt.SubTournaments.Count, Is.EqualTo(4));
     }
@@ -57,8 +55,7 @@ public class MultiTournamentTests
     [Test]
     public void Start_WorldCup_Creates8GroupSubTournaments()
     {
-        var mt = new MultiTournament("World Cup", new FootballWorldCupStrategy());
-        mt.Contestants.AddRange(Teams(32));
+        var mt = new MultiTournament("World Cup", new FootballWorldCupStrategy(), Teams(32));
         mt.Start();
         Assert.That(mt.SubTournaments.Count, Is.EqualTo(8));
     }
@@ -66,8 +63,7 @@ public class MultiTournamentTests
     [Test]
     public void Start_EachSubTournamentIsStarted_HasMatches()
     {
-        var mt = new MultiTournament("World Cup", new FootballWorldCupStrategy());
-        mt.Contestants.AddRange(Teams(32));
+        var mt = new MultiTournament("World Cup", new FootballWorldCupStrategy(), Teams(32));
         mt.Start();
 
         foreach (var sub in mt.SubTournaments.Cast<SingleTournament>())
@@ -77,14 +73,13 @@ public class MultiTournamentTests
     [Test]
     public void AdvanceToNextStage_AddsNewSubTournaments()
     {
-        var mt = new MultiTournament("World Cup", new FootballWorldCupStrategy());
-        mt.Contestants.AddRange(Teams(32));
+        var mt = new MultiTournament("World Cup", new FootballWorldCupStrategy(), Teams(32));
         mt.Start();
 
         foreach (var sub in mt.SubTournaments)
             for (int j = 0; j < sub.Contestants.Count; j++)
-                sub.TournamentResults[sub.Contestants[j]] =
-                    new FootballLeaderboardScore { Points = (sub.Contestants.Count - j) * 3 };
+                sub.SetResult(sub.Contestants[j],
+                    new FootballLeaderboardScore(wins: sub.Contestants.Count - j, draws: 0, losses: 0));
 
         int before = mt.SubTournaments.Count;
         mt.AdvanceToNextStage();
@@ -96,8 +91,7 @@ public class MultiTournamentTests
     public void AdvanceToNextStage_FourHills_StrategyReturnsNull_CountUnchanged()
     {
         // FourHillsStrategy.CreateNextStage always returns null
-        var mt = new MultiTournament("Four Hills", new FourHillsStrategy(new DefaultRandomProvider()));
-        mt.Contestants.AddRange(Teams(4));
+        var mt = new MultiTournament("Four Hills", new FourHillsStrategy(new DefaultRandomProvider()), Teams(4));
         mt.Start();
 
         int before = mt.SubTournaments.Count;
@@ -109,14 +103,13 @@ public class MultiTournamentTests
     [Test]
     public void End_PopulatesTournamentResults()
     {
-        var mt = new MultiTournament("Four Hills", new FourHillsStrategy(new DefaultRandomProvider()));
         var teams = Teams(4);
-        mt.Contestants.AddRange(teams);
+        var mt = new MultiTournament("Four Hills", new FourHillsStrategy(new DefaultRandomProvider()), teams);
         mt.Start();
 
         foreach (var sub in mt.SubTournaments)
             foreach (var c in teams)
-                sub.TournamentResults[c] = new SkiJumpingScore(100f, 0f, 0f, 0f);
+                sub.SetResult(c, new SkiJumpingScore(100f, 0f, 0f, 0f));
 
         mt.End();
 
@@ -127,17 +120,16 @@ public class MultiTournamentTests
     [Test]
     public void End_AggregatesScoresFromAllSubTournaments()
     {
-        var mt = new MultiTournament("Four Hills", new FourHillsStrategy(new DefaultRandomProvider()));
         var teams = Teams(2);
         var t0 = teams[0]; var t1 = teams[1];
-        mt.Contestants.AddRange(teams);
+        var mt = new MultiTournament("Four Hills", new FourHillsStrategy(new DefaultRandomProvider()), teams);
         mt.Start();
 
         // t0: 200 per hill = 800. t1: 100 per hill = 400.
         foreach (var sub in mt.SubTournaments)
         {
-            sub.TournamentResults[t0] = new SkiJumpingScore(200f, 0f, 0f, 0f);
-            sub.TournamentResults[t1] = new SkiJumpingScore(100f, 0f, 0f, 0f);
+            sub.SetResult(t0, new SkiJumpingScore(200f, 0f, 0f, 0f));
+            sub.SetResult(t1, new SkiJumpingScore(100f, 0f, 0f, 0f));
         }
 
         mt.End();
@@ -149,15 +141,14 @@ public class MultiTournamentTests
     [Test]
     public void End_WinnerHasHighestAggregateScore()
     {
-        var mt = new MultiTournament("Four Hills", new FourHillsStrategy(new DefaultRandomProvider()));
         var teams = Teams(3);
-        mt.Contestants.AddRange(teams);
+        var mt = new MultiTournament("Four Hills", new FourHillsStrategy(new DefaultRandomProvider()), teams);
         mt.Start();
 
         float[] perHill = { 300f, 200f, 100f }; // teams[0] always scores most
         foreach (var sub in mt.SubTournaments)
             for (int i = 0; i < teams.Count; i++)
-                sub.TournamentResults[teams[i]] = new SkiJumpingScore(perHill[i], 0f, 0f, 0f);
+                sub.SetResult(teams[i], new SkiJumpingScore(perHill[i], 0f, 0f, 0f));
 
         mt.End();
 

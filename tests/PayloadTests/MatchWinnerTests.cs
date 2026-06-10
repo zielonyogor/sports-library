@@ -1,4 +1,4 @@
-﻿using SportsLibrary.Football;
+using SportsLibrary.Football;
 using SportsLibrary.Core;
 using SportsLibrary.SkiJumping;
 
@@ -16,8 +16,8 @@ public class MatchWinnerTests
     {
         var red = T("Red"); var blue = T("Blue");
         var match = new Match("Test", new[] { red, blue });
-        match.Statistics[red] = new FootballMatchScore { GoalsScored = 3 };
-        match.Statistics[blue] = new FootballMatchScore { GoalsScored = 1 };
+        match.SetScore(red, new FootballMatchScore(goalsScored: 3));
+        match.SetScore(blue, new FootballMatchScore(goalsScored: 1));
 
         Assert.That(match.GetWinner(), Is.SameAs(red));
     }
@@ -27,9 +27,9 @@ public class MatchWinnerTests
     {
         var red = T("Red"); var blue = T("Blue");
         var match = new Match("Test", new[] { red, blue });
-        match.Statistics[red] = new FootballMatchScore { GoalsScored = 2 };
-        match.Statistics[blue] = new FootballMatchScore { GoalsScored = 2 };
-        match.PenaltyWinner = blue;
+        match.SetScore(red, new FootballMatchScore(goalsScored: 2));
+        match.SetScore(blue, new FootballMatchScore(goalsScored: 2));
+        match.AssignPenaltyWinner(blue);
 
         Assert.That(match.GetWinner(), Is.SameAs(blue));
     }
@@ -39,8 +39,8 @@ public class MatchWinnerTests
     {
         var red = T("Red"); var blue = T("Blue");
         var match = new Match("Test", new[] { red, blue });
-        match.Statistics[red] = new FootballMatchScore { GoalsScored = 1 };
-        match.Statistics[blue] = new FootballMatchScore { GoalsScored = 1 };
+        match.SetScore(red, new FootballMatchScore(goalsScored: 1));
+        match.SetScore(blue, new FootballMatchScore(goalsScored: 1));
 
         Assert.That(match.GetWinner(), Is.Null);
     }
@@ -57,8 +57,8 @@ public class MatchWinnerTests
     {
         var team = T("Red");
         var match = new Match("Test", new[] { team });
-        var score = new FootballMatchScore { GoalsScored = 2 };
-        match.Statistics[team] = score;
+        var score = new FootballMatchScore(goalsScored: 2);
+        match.SetScore(team, score);
 
         Assert.That(match.GetCurrentScore(team), Is.SameAs(score));
     }
