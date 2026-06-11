@@ -1,5 +1,8 @@
 namespace SportsLibrary.Core
 {
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public sealed class SportClub : Organization
     {
         public CountryCode Country { get; set; }

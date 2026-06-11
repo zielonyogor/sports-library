@@ -1,5 +1,9 @@
 namespace SportsLibrary.Core
 {
+    /// <summary>
+    /// Represents a single tournament which is a set of consecutive matches between contestants, 
+    /// following a specific matches strategy. 
+    /// </summary>
     public sealed class SingleTournament : ITournament
     {
         private readonly List<IContestant> _contestants;
