@@ -3,7 +3,7 @@ namespace SportsLibrary.Core
     /// <summary>
     /// Default implementation of the IRandomProvider interface, which uses the System.Random class to generate random numbers.
     /// </summary>
-    public class DefaultRandomProvider : IRandomProvider
+    public sealed class DefaultRandomProvider : IRandomProvider
     {
         private readonly Random _random;
 

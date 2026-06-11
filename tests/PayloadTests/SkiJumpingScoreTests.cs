@@ -48,12 +48,13 @@ public class SkiJumpingScoreTests
     }
 
     [Test]
-    public void Properties_AreSettableAfterConstruction()
+    public void Properties_ReadableAfterConstruction()
     {
-        var score = new SkiJumpingScore(0f, 0f, 0f, 0f);
-        score.DistancePoints = 130f;
-        score.StylePoints = 57f;
-        Assert.That(score.Points, Is.EqualTo(187f).Within(0.001f));
+        var score = new SkiJumpingScore(130f, 57f, -2f, 1.2f);
+        Assert.That(score.DistancePoints, Is.EqualTo(130f).Within(0.001f));
+        Assert.That(score.StylePoints, Is.EqualTo(57f).Within(0.001f));
+        Assert.That(score.WindCompensation, Is.EqualTo(-2f).Within(0.001f));
+        Assert.That(score.GateCompensation, Is.EqualTo(1.2f).Within(0.001f));
     }
 
     [Test]

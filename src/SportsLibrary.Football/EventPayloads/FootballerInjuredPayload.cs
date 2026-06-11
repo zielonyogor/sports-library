@@ -2,7 +2,7 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.Football
 {
-    public class FootballerInjuredPayload : IEventPayload
+    public sealed class FootballerInjuredPayload : IEventPayload
     {
         /// <summary>The player who was injured.</summary>
         public IContestant? Contestant { get; init; }

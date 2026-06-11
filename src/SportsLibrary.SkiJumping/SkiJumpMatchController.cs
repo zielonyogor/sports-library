@@ -2,7 +2,7 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.SkiJumping
 {
-    public class SkiJumpMatchController(Match match)
+    public sealed class SkiJumpMatchController(Match match)
     {
         public double GetTotalScore(IContestant contestant) =>
             match.Timeline.GetEventsByPayloadType<SkiJumpPayload>()

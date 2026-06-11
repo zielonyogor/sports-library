@@ -6,7 +6,7 @@ namespace SportsLibrary.Core
     /// </summary>
     public interface IInGameEvent
     {
-        DateTime Timestamp { get; set; }
+        DateTime Timestamp { get; }
         IEventPayload GetEvent();
     }
 }

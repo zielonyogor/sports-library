@@ -18,8 +18,8 @@ public class FootballWorldCupStrategyTests
     {
         foreach (var g in groups)
             for (int j = 0; j < g.Contestants.Count; j++)
-                g.TournamentResults[g.Contestants[j]] =
-                    new FootballLeaderboardScore { Points = (g.Contestants.Count - j) * 3 };
+                g.SetResult(g.Contestants[j],
+                    new FootballLeaderboardScore(wins: g.Contestants.Count - j, draws: 0, losses: 0));
     }
 
     [Test]
@@ -121,7 +121,7 @@ public class FootballWorldCupStrategyTests
         var champion = groups[0].Contestants[0];
 
         var bracket = new SingleTournament("Bracket Stage", new FootballBracketStageStrategy());
-        bracket.TournamentResults[champion] = new FootballMatchScore { GoalsScored = 5 };
+        bracket.SetResult(champion, new FootballMatchScore(goalsScored: 5));
 
         var allTournaments = groups.ToList<ITournament>();
         allTournaments.Add(bracket);
@@ -138,7 +138,7 @@ public class FootballWorldCupStrategyTests
         var strategy = new FootballWorldCupStrategy();
         var groups = strategy.CreateSubTournaments(Make32Teams());
         var topTeam = groups[0].Contestants[0];
-        groups[0].TournamentResults[topTeam] = new FootballLeaderboardScore { Points = 9 };
+        groups[0].SetResult(topTeam, new FootballLeaderboardScore(wins: 3, draws: 0, losses: 0));
 
         var results = strategy.AggregateResults(groups);
 

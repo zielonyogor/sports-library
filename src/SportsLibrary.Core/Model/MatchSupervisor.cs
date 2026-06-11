@@ -1,9 +1,9 @@
 namespace SportsLibrary.Core
 {
-    public class MatchSupervisor
+    public sealed class MatchSupervisor
     {
         public Guid Id { get; } = Guid.NewGuid();
-        public Person Person { get; set; }
+        public Person Person { get; }
 
         public MatchSupervisor(Person person)
         {

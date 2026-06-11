@@ -2,7 +2,7 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.Football
 {
-    public class FootballGoalPayload : IEventPayload
+    public sealed class FootballGoalPayload : IEventPayload
     {
         public IScore? Score { get; init; }
         /// <summary>The contestant who scored.</summary>

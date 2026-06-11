@@ -1,6 +1,6 @@
 namespace SportsLibrary.Core
 {
-    public class SportClub : Organization
+    public sealed class SportClub : Organization
     {
         public CountryCode Country { get; set; }
 

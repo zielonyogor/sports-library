@@ -5,17 +5,17 @@ namespace SportsLibrary.SkiJumping
     /// <summary>
     /// All contestants compete in one qualification match; top 30 advance to a finals match.
     /// </summary>
-    public class SkiJumpingQualificationStrategy : IMatchesStrategy
+    public sealed class SkiJumpingQualificationStrategy : IMatchesStrategy
     {
         private bool _finalCreated;
 
-        public List<IMatch> CreateMatches(List<IContestant> contestants)
+        public IReadOnlyList<IMatch> CreateMatches(IReadOnlyList<IContestant> contestants)
         {
             _finalCreated = false;
             return new List<IMatch> { new Match("Qualification", contestants) };
         }
 
-        public List<IMatch>? CreateNextRound(List<IMatch> completedMatches)
+        public IReadOnlyList<IMatch>? CreateNextRound(IReadOnlyList<IMatch> completedMatches)
         {
             if (_finalCreated) return null;
 

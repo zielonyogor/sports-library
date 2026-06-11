@@ -62,8 +62,8 @@ public class SkiJumpingDuelStrategyTests
 
         foreach (var duel in duels)
         {
-            duel.Statistics[duel.Contestants[0]] = H.Pts(150f);
-            duel.Statistics[duel.Contestants[1]] = H.Pts(100f);
+            duel.SetScore(duel.Contestants[0], H.Pts(150f));
+            duel.SetScore(duel.Contestants[1], H.Pts(100f));
         }
 
         var finals = strategy.CreateNextRound(duels);
@@ -83,8 +83,8 @@ public class SkiJumpingDuelStrategyTests
         var expectedWorstLoser = duels[0].Contestants[1];
         for (int i = 0; i < duels.Count; i++)
         {
-            duels[i].Statistics[duels[i].Contestants[0]] = H.Pts(200f);
-            duels[i].Statistics[duels[i].Contestants[1]] = H.Pts((i + 1) * 10f);
+            duels[i].SetScore(duels[i].Contestants[0], H.Pts(200f));
+            duels[i].SetScore(duels[i].Contestants[1], H.Pts((i + 1) * 10f));
         }
 
         var finals = strategy.CreateNextRound(duels);
@@ -104,8 +104,8 @@ public class SkiJumpingDuelStrategyTests
         var expectedWinners = new HashSet<IContestant>();
         foreach (var duel in duels)
         {
-            duel.Statistics[duel.Contestants[0]] = H.Pts(80f);
-            duel.Statistics[duel.Contestants[1]] = H.Pts(120f);
+            duel.SetScore(duel.Contestants[0], H.Pts(80f));
+            duel.SetScore(duel.Contestants[1], H.Pts(120f));
             expectedWinners.Add(duel.Contestants[1]);
         }
 
@@ -124,8 +124,8 @@ public class SkiJumpingDuelStrategyTests
 
         foreach (var d in duels)
         {
-            d.Statistics[d.Contestants[0]] = H.Pts(100f);
-            d.Statistics[d.Contestants[1]] = H.Pts(50f);
+            d.SetScore(d.Contestants[0], H.Pts(100f));
+            d.SetScore(d.Contestants[1], H.Pts(50f));
         }
 
         var finals = strategy.CreateNextRound(duels);
@@ -144,8 +144,8 @@ public class SkiJumpingDuelStrategyTests
         var duels1 = strategy.CreateMatches(contestants);
         foreach (var d in duels1)
         {
-            d.Statistics[d.Contestants[0]] = H.Pts(100f);
-            d.Statistics[d.Contestants[1]] = H.Pts(50f);
+            d.SetScore(d.Contestants[0], H.Pts(100f));
+            d.SetScore(d.Contestants[1], H.Pts(50f));
         }
         strategy.CreateNextRound(duels1); // _finalCreated = true
 
@@ -153,8 +153,8 @@ public class SkiJumpingDuelStrategyTests
         var duels2 = strategy.CreateMatches(contestants);
         foreach (var d in duels2)
         {
-            d.Statistics[d.Contestants[0]] = H.Pts(100f);
-            d.Statistics[d.Contestants[1]] = H.Pts(50f);
+            d.SetScore(d.Contestants[0], H.Pts(100f));
+            d.SetScore(d.Contestants[1], H.Pts(50f));
         }
         var finals2 = strategy.CreateNextRound(duels2);
 

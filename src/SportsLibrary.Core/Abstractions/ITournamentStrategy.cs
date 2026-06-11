@@ -2,8 +2,8 @@ namespace SportsLibrary.Core
 {
     public interface ITournamentStrategy
     {
-        List<ITournament> CreateSubTournaments(List<IContestant> contestants);
-        List<ITournament>? CreateNextStage(List<ITournament> completedTournaments);
-        Dictionary<IContestant, IScore> AggregateResults(List<ITournament> tournaments);
+        IReadOnlyList<ITournament> CreateSubTournaments(IReadOnlyList<IContestant> contestants);
+        IReadOnlyList<ITournament>? CreateNextStage(IReadOnlyList<ITournament> completedTournaments);
+        IReadOnlyDictionary<IContestant, IScore> AggregateResults(IReadOnlyList<ITournament> tournaments);
     }
 }

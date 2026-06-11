@@ -17,15 +17,15 @@ public class FootballBracketStageStrategyTests
     private static void Win(IMatch match, IContestant winner, int winnerGoals = 1, int loserGoals = 0)
     {
         var loser = match.Contestants.First(c => c != winner);
-        match.Statistics[winner] = new FootballMatchScore { GoalsScored = winnerGoals, Result = MatchOutcome.Win };
-        match.Statistics[loser] = new FootballMatchScore { GoalsScored = loserGoals, Result = MatchOutcome.Lose };
+        match.SetScore(winner, new FootballMatchScore(winnerGoals, MatchOutcome.Win));
+        match.SetScore(loser, new FootballMatchScore(loserGoals, MatchOutcome.Lose));
     }
 
     private static void Draw(IMatch match, IContestant penaltyWinner)
     {
         foreach (var c in match.Contestants)
-            match.Statistics[c] = new FootballMatchScore { GoalsScored = 1, Result = MatchOutcome.Draw };
-        ((Match)match).PenaltyWinner = penaltyWinner;
+            match.SetScore(c, new FootballMatchScore(1, MatchOutcome.Draw));
+        ((Match)match).AssignPenaltyWinner(penaltyWinner);
     }
 
     [Test]

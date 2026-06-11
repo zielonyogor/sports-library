@@ -4,7 +4,7 @@ namespace SportsLibrary.Core
     /// Represents a timeline of in-game events. Events are stored in the order they were added, additionally identified by their timestamps. 
     /// Provides methods to add events, repeat the timeline, and query events by payload type.
     /// </summary>
-    public class Timeline
+    public sealed class Timeline
     {
         private readonly List<IInGameEvent> _events = new();
 

@@ -8,7 +8,7 @@ namespace SportsLibrary.Core
     public interface IContestant
     {
         Guid Id { get; }
-        string Name { get; set; }
+        string Name { get; }
         IOrganization? Organisation { get; set; }
     }
 }

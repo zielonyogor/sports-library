@@ -23,7 +23,7 @@ public class TimelineTests
     public void AddEvent_EventAppearsInEvents()
     {
         var timeline = new Timeline();
-        var ev = new InGameEvent(DateTime.Now, new EventPayload());
+        var ev = new InGameEvent(DateTime.Now, new SkiJumpPayload());
 
         timeline.AddEvent(ev);
 
@@ -35,7 +35,7 @@ public class TimelineTests
     {
         var timeline = new Timeline();
         var events = Enumerable.Range(0, 5)
-            .Select(_ => new InGameEvent(DateTime.Now, new EventPayload()))
+            .Select(_ => new InGameEvent(DateTime.Now, new SkiJumpPayload()))
             .ToList<IInGameEvent>();
 
         foreach (var ev in events) timeline.AddEvent(ev);
@@ -61,9 +61,9 @@ public class TimelineTests
         var base_ = new DateTime(2024, 1, 1, 10, 0, 0);
 
         // Add in reverse order
-        timeline.AddEvent(new InGameEvent(base_.AddMinutes(30), new EventPayload()));
-        timeline.AddEvent(new InGameEvent(base_.AddMinutes(10), new EventPayload()));
-        timeline.AddEvent(new InGameEvent(base_.AddMinutes(50), new EventPayload()));
+        timeline.AddEvent(new InGameEvent(base_.AddMinutes(30), new SkiJumpPayload()));
+        timeline.AddEvent(new InGameEvent(base_.AddMinutes(10), new SkiJumpPayload()));
+        timeline.AddEvent(new InGameEvent(base_.AddMinutes(50), new SkiJumpPayload()));
 
         var replayed = new List<DateTime>();
         timeline.RepeatTimeline(ev => replayed.Add(ev.Timestamp));
@@ -87,24 +87,24 @@ public class TimelineTests
     {
         var timeline = new Timeline();
         var contestant = C("Kamil");
-        var payload = new EventPayload { Contestant = contestant, Score = Pts(200f) };
+        var payload = new SkiJumpPayload { Contestant = contestant, Score = Pts(200f) };
         timeline.AddEvent(new InGameEvent(DateTime.Now, payload));
 
         IEventPayload? captured = null;
         timeline.RepeatTimeline(ev => captured = ev.GetEvent());
 
         Assert.That(captured, Is.SameAs(payload));
-        var ep = (EventPayload)captured!;
+        var ep = (SkiJumpPayload)captured!;
         Assert.That(ep.Contestant, Is.SameAs(contestant));
         Assert.That(ep.Score!.GetValue(), Is.EqualTo(200).Within(0.01));
     }
 
-    // ── EventPayload properties ───────────────────────────────────────────────
+    // ── SkiJumpPayload properties ───────────────────────────────────────────────
 
     [Test]
-    public void EventPayload_AllPropertiesNullByDefault()
+    public void SkiJumpPayload_AllPropertiesNullByDefault()
     {
-        var payload = new EventPayload();
+        var payload = new SkiJumpPayload();
 
         Assert.That(payload.Score, Is.Null);
         Assert.That(payload.Contestant, Is.Null);
@@ -112,13 +112,13 @@ public class TimelineTests
     }
 
     [Test]
-    public void EventPayload_PropertiesSetViaInitializer()
+    public void SkiJumpPayload_PropertiesSetViaInitializer()
     {
         var contestant = C("Stefan");
         var referee = Referee();
         var score = Pts(150f);
 
-        var payload = new EventPayload
+        var payload = new SkiJumpPayload
         {
             Contestant = contestant,
             Referee = referee,

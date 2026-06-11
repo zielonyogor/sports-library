@@ -4,12 +4,12 @@ namespace SportsLibrary.Core
     /// Represents a person involved in sports, such as a player or referee. 
     /// Contains basic personal information such as name, birth date, weight, and height.
     /// </summary>
-    public class Person
+    public sealed class Person
     {
         public Guid Id { get; } = Guid.NewGuid();
-        public string Name { get; set; }
-        public string Surname { get; set; }
-        public DateOnly BirthDate { get; set; }
+        public string Name { get; init; }
+        public string Surname { get; init; }
+        public DateOnly BirthDate { get; init; }
         public float Weight { get; set; }
         public float Height { get; set; }
 

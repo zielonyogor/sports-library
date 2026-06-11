@@ -4,6 +4,9 @@ namespace SportsLibrary.Core
     {
         Guid Id { get; }
         string Name { get; set; }
-        ICollection<IContestant> Members { get; set; }
+        IReadOnlyCollection<IContestant> Members { get; }
+
+        void AddMember(IContestant contestant);
+        bool RemoveMember(IContestant contestant);
     }
 }

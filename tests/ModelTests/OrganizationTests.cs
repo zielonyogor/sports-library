@@ -1,6 +1,4 @@
-﻿using SportsLibrary.Football;
-using SportsLibrary.Core;
-using SportsLibrary.SkiJumping;
+﻿using SportsLibrary.Core;
 
 namespace ModelTests;
 
@@ -12,31 +10,31 @@ public class OrganizationTests
     [Test]
     public void Id_UniquePerInstance()
     {
-        var o1 = new Organization("Club A");
-        var o2 = new Organization("Club B");
+        var o1 = new Country("Poland", CountryCode.Poland);
+        var o2 = new Country("Germany", CountryCode.Germany);
         Assert.That(o1.Id, Is.Not.EqualTo(o2.Id));
     }
 
     [Test]
     public void Name_SetViaConstructor()
     {
-        var org = new Organization("FC Warsaw");
-        Assert.That(org.Name, Is.EqualTo("FC Warsaw"));
+        var org = new Country("Poland", CountryCode.Poland);
+        Assert.That(org.Name, Is.EqualTo("Poland"));
     }
 
     [Test]
     public void Members_EmptyByDefault()
     {
-        var org = new Organization("Club");
+        var org = new Country("Poland", CountryCode.Poland);
         Assert.That(org.Members, Is.Empty);
     }
 
     [Test]
     public void Members_CanAddAndRetrieveContestants()
     {
-        var org = new Organization("Club");
+        var org = new Country("Poland", CountryCode.Poland);
         var member = new SingleContestant("Athlete", new Person("A", "B"));
-        org.Members.Add(member);
+        org.AddMember(member);
         Assert.That(org.Members, Contains.Item(member));
     }
 
@@ -64,14 +62,14 @@ public class OrganizationTests
     [Test]
     public void Country_InheritsNameFromOrganization()
     {
-        var country = new Country("Poland");
+        var country = new Country("Poland", CountryCode.Poland);
         Assert.That(country.Name, Is.EqualTo("Poland"));
     }
 
     [Test]
     public void Country_Members_EmptyByDefault()
     {
-        var country = new Country("Germany");
+        var country = new Country("Germany", CountryCode.Germany);
         Assert.That(country.Members, Is.Empty);
     }
 

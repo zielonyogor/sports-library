@@ -6,7 +6,7 @@ namespace SportsLibrary.SkiJumping
     /// Pairs 50 contestants into 25 1v1 duels. After all duels finish, creates one final
     /// with 25 winners plus the 5 highest-scoring losers.
     /// </summary>
-    public class SkiJumpingDuelStrategy : IMatchesStrategy
+    public sealed class SkiJumpingDuelStrategy : IMatchesStrategy
     {
         private readonly IRandomProvider _random;
         private bool _finalCreated;
@@ -22,7 +22,7 @@ namespace SportsLibrary.SkiJumping
         /// </summary>
         /// <param name="contestants">The list of contestants to be paired into duels.</param>
         /// <returns>A list of matches created from the contestants.</returns>
-        public List<IMatch> CreateMatches(List<IContestant> contestants)
+        public IReadOnlyList<IMatch> CreateMatches(IReadOnlyList<IContestant> contestants)
         {
             _finalCreated = false;
             var shuffled = contestants.OrderBy(_ => _random.Next()).ToList();
@@ -37,7 +37,7 @@ namespace SportsLibrary.SkiJumping
         /// </summary>
         /// <param name="completedMatches">The list of completed matches.</param>
         /// <returns>A list of matches for the next round, or null if the final has already been created.</returns>
-        public List<IMatch>? CreateNextRound(List<IMatch> completedMatches)
+        public IReadOnlyList<IMatch>? CreateNextRound(IReadOnlyList<IMatch> completedMatches)
         {
             if (_finalCreated) return null;
 
