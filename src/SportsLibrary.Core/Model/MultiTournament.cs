@@ -24,6 +24,7 @@ namespace SportsLibrary.Core
         {
             ArgumentNullException.ThrowIfNull(tournamentStrategy);
             ArgumentNullException.ThrowIfNull(contestants);
+            ArgumentException.ThrowIfNullOrEmpty(name);
             Name = name;
             TournamentStrategy = tournamentStrategy;
             _contestants = contestants.ToList();

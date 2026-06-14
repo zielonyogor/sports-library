@@ -31,6 +31,7 @@ namespace SportsLibrary.Core
             ArgumentNullException.ThrowIfNull(matchesStrategy);
             ArgumentNullException.ThrowIfNull(contestants);
             ArgumentNullException.ThrowIfNull(rankingStrategy);
+            ArgumentException.ThrowIfNullOrEmpty(name);
             Name = name;
             MatchesStrategy = matchesStrategy;
             _contestants = contestants.ToList();
