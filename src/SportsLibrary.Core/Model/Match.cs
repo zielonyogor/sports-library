@@ -15,7 +15,7 @@ namespace SportsLibrary.Core
 
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; set; }
-        public MatchState State => _stateTracker.CurrentState;
+        public MatchState State => _stateTracker.CurrentState ?? throw new InvalidOperationException("Match state is not initialized yet.");
         public IReadOnlyList<IContestant> Contestants => _contestants;
         public IMatchResultStrategy ResultStrategy { get; }
         public Timeline Timeline => _timeline;
@@ -34,7 +34,7 @@ namespace SportsLibrary.Core
             ResultStrategy = resultStrategy ?? new PenaltyPresentMatchResultStrategy();
             _transitionPolicy = new MatchStateTransitionPolicy();
 
-            _stateTracker = new MatchStateTracker(MatchState.Scheduled);
+            _stateTracker = new MatchStateTracker();
             _statisticsTracker = new MatchStatisticsTracker();
             _penaltyWinnerTracker = new PenaltyWinnerTracker();
 
@@ -42,7 +42,7 @@ namespace SportsLibrary.Core
             _timeline.Subscribe(_statisticsTracker);
             _timeline.Subscribe(_penaltyWinnerTracker);
 
-            AppendEvent(new ScheduledMatchStateEventPayload(scheduledDate), scheduledDate, skipTransitionValidation: true);
+            AppendEvent(new ScheduledMatchStateEventPayload(scheduledDate), scheduledDate);
         }
 
         public Match(
@@ -71,50 +71,49 @@ namespace SportsLibrary.Core
         public void RecordEvent(IEventPayload payload, DateTime? timestamp = null)
         {
             ArgumentNullException.ThrowIfNull(payload);
-            AppendEvent(payload, timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+            AppendEvent(payload, timestamp ?? DateTime.UtcNow);
         }
 
         public void RecordEvent(IInGameEvent gameEvent)
         {
             ArgumentNullException.ThrowIfNull(gameEvent);
-            AppendEvent(gameEvent.GetEvent(), gameEvent.Timestamp, skipTransitionValidation: false);
+            AppendEvent(gameEvent.GetEvent(), gameEvent.Timestamp);
         }
 
         public void Start(DateTime? timestamp = null) =>
-            AppendEvent(new InProgressMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+            AppendEvent(new InProgressMatchStateEventPayload(), timestamp ?? DateTime.UtcNow);
 
         public void Pause(DateTime? timestamp = null) =>
-            AppendEvent(new PausedMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+            AppendEvent(new PausedMatchStateEventPayload(), timestamp ?? DateTime.UtcNow);
 
         public void Finish(DateTime? timestamp = null) =>
-            AppendEvent(new FinishedMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+            AppendEvent(new FinishedMatchStateEventPayload(), timestamp ?? DateTime.UtcNow);
 
         public void Cancel(DateTime? timestamp = null) =>
-            AppendEvent(new CancelledMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+            AppendEvent(new CancelledMatchStateEventPayload(), timestamp ?? DateTime.UtcNow);
 
         public void Reject(string reason, DateTime? timestamp = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(reason);
-            AppendEvent(new RejectedMatchStateEventPayload(reason), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+            AppendEvent(new RejectedMatchStateEventPayload(reason), timestamp ?? DateTime.UtcNow);
         }
 
         public void Reschedule(DateTime? timestamp = null) =>
-            AppendEvent(new RescheduledMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+            AppendEvent(new RescheduledMatchStateEventPayload(), timestamp ?? DateTime.UtcNow);
 
         public IScore? GetCurrentScore(IContestant contestant) =>
             _statisticsTracker.GetCurrentScore(contestant);
 
         public IContestant? GetWinner() => ResultStrategy.DetermineWinner(this);
 
-        private void AppendEvent(IEventPayload payload, DateTime timestamp, bool skipTransitionValidation)
+        private void AppendEvent(IEventPayload payload, DateTime timestamp)
         {
             ValidatePayload(payload);
 
-            if (!skipTransitionValidation && payload is IMatchStateEventPayload statePayload)
+            if (payload is IMatchStateEventPayload statePayload)
                 ValidateTransition(statePayload.ResultingState);
 
-            if (!skipTransitionValidation)
-                ValidateEventAllowedInCurrentState(payload);
+            ValidateEventAllowedInCurrentState(payload);
 
             _timeline.AddEvent(new InGameEvent(timestamp, payload));
         }
@@ -152,7 +151,7 @@ namespace SportsLibrary.Core
 
         private void ValidateTransition(MatchState targetState)
         {
-            var currentState = State;
+            var currentState = _stateTracker.CurrentState;
             if (!_transitionPolicy.IsTransitionAllowed(currentState, targetState))
                 throw new InvalidOperationException($"Invalid match state transition from {currentState} to {targetState}.");
         }

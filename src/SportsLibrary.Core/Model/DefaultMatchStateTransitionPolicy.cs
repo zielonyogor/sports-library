@@ -17,7 +17,12 @@ namespace SportsLibrary.Core
                 [MatchState.Rejected] = new(),
             };
 
-        public bool IsTransitionAllowed(MatchState currentState, MatchState targetState) =>
-            AllowedTransitions.TryGetValue(currentState, out var allowed) && allowed.Contains(targetState);
+        public bool IsTransitionAllowed(MatchState? currentState, MatchState targetState)
+        {
+            if (currentState is null)
+                return targetState == MatchState.Scheduled;
+
+            return AllowedTransitions.TryGetValue(currentState.Value, out var allowed) && allowed.Contains(targetState);
+        }
     }
 }

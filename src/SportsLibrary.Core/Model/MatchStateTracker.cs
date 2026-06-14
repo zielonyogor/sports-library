@@ -2,12 +2,7 @@ namespace SportsLibrary.Core
 {
     public sealed class MatchStateTracker : ITimelineListener
     {
-        public MatchState CurrentState { get; private set; }
-
-        public MatchStateTracker(MatchState initialState)
-        {
-            CurrentState = initialState;
-        }
+        public MatchState? CurrentState { get; private set; }
 
         public void OnEventRecorded(IInGameEvent gameEvent)
         {
