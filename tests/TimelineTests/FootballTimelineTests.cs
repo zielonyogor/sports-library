@@ -81,8 +81,9 @@ public class FootballTimelineTests
         var red = C("Red");
         var blue = C("Blue");
         var referee = R("Referee");
-        var match = new Match("Group A", new[] { red, blue });
         var kickOff = new DateTime(2024, 7, 15, 15, 0, 0);
+        var match = new Match("Group A", new[] { red, blue }, kickOff.AddMinutes(-1));
+        match.Start(kickOff);
 
         // Build timeline: goal at 22', yellow card at 45', goal at 67', red card at 88'
         match.RecordEvent(new InGameEvent(kickOff.AddMinutes(22), new FootballGoalPayload
@@ -91,13 +92,6 @@ public class FootballTimelineTests
             Minute = 22,
             Referee = referee,
             Score = new FootballMatchScore(1, MatchOutcome.Win),
-        }));
-        match.RecordEvent(new InGameEvent(kickOff.AddMinutes(88), new FootballCardPayload
-        {
-            Contestant = red,
-            CardType = CardType.Red,
-            Minute = 88,
-            Referee = referee,
         }));
         match.RecordEvent(new InGameEvent(kickOff.AddMinutes(45), new FootballCardPayload
         {
@@ -113,9 +107,16 @@ public class FootballTimelineTests
             Referee = referee,
             Score = new FootballMatchScore(1, MatchOutcome.Draw),
         }));
+        match.RecordEvent(new InGameEvent(kickOff.AddMinutes(88), new FootballCardPayload
+        {
+            Contestant = red,
+            CardType = CardType.Red,
+            Minute = 88,
+            Referee = referee,
+        }));
 
         var log = new List<(int minute, string type, string team)>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             switch (ev.GetEvent())
             {
@@ -126,10 +127,9 @@ public class FootballTimelineTests
                     log.Add((c.Minute, c.CardType == CardType.Yellow ? "yellow" : "red", c.Contestant!.Name));
                     break;
             }
-        });
+                }
 
-        // Replay is in chronological order regardless of insertion order
-        Assert.That(log.Select(e => e.minute), Is.Ordered.Ascending);
+                Assert.That(log.Select(e => e.minute), Is.Ordered.Ascending);
         Assert.That(log, Has.Count.EqualTo(4));
         Assert.That(log[0], Is.EqualTo((22, "goal", "Red")));
         Assert.That(log[1], Is.EqualTo((45, "yellow", "Blue")));
@@ -142,8 +142,9 @@ public class FootballTimelineTests
     {
         var red = C("Red");
         var blue = C("Blue");
-        var match = new Match("Final", new[] { red, blue });
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
+        var match = new Match("Final", new[] { red, blue }, t.AddMinutes(-1));
+        match.Start(t);
 
         // Red scores twice; Blue scores once
         match.RecordEvent(new InGameEvent(t.AddMinutes(10), new FootballGoalPayload { Contestant = red }));
@@ -151,14 +152,14 @@ public class FootballTimelineTests
         match.RecordEvent(new InGameEvent(t.AddMinutes(80), new FootballGoalPayload { Contestant = red }));
 
         var goals = new Dictionary<IContestant, int>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             if (ev.GetEvent() is FootballGoalPayload g && g.Contestant != null)
             {
                 goals.TryGetValue(g.Contestant, out var n);
                 goals[g.Contestant] = n + 1;
             }
-        });
+        }
 
         Assert.That(goals[red], Is.EqualTo(2));
         Assert.That(goals[blue], Is.EqualTo(1));
@@ -168,8 +169,9 @@ public class FootballTimelineTests
     public void Timeline_CardAccumulation_TwoYellowsMakeRed()
     {
         var player = C("Blue");
-        var match = new Match("Semifinal", new[] { player });
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
+        var match = new Match("Semifinal", new[] { player }, t.AddMinutes(-1));
+        match.Start(t);
 
         match.RecordEvent(new InGameEvent(t.AddMinutes(30), new FootballCardPayload
         {
@@ -187,7 +189,7 @@ public class FootballTimelineTests
         }));
 
         var yellowCount = new Dictionary<IContestant, int>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             if (ev.GetEvent() is FootballCardPayload card
                 && card.CardType == CardType.Yellow
@@ -196,7 +198,7 @@ public class FootballTimelineTests
                 yellowCount.TryGetValue(card.Contestant, out var n);
                 yellowCount[card.Contestant] = n + 1;
             }
-        });
+        }
 
         Assert.That(yellowCount[player], Is.EqualTo(2),
             "Two yellow cards in the timeline — player should be considered sent off");
@@ -239,8 +241,9 @@ public class FootballTimelineTests
     {
         var red = C("Red");
         var blue = C("Blue");
-        var match = new Match("Group B", new[] { red, blue });
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
+        var match = new Match("Group B", new[] { red, blue }, t.AddMinutes(-1));
+        match.Start(t);
 
         match.RecordEvent(new InGameEvent(t.AddMinutes(22),
             new FootballGoalPayload { Contestant = red, Minute = 22 }));
@@ -252,7 +255,7 @@ public class FootballTimelineTests
             new FootballerInjuredPayload { Contestant = red, Minute = 78 }));
 
         int goals = 0, injuries = 0, cards = 0;
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             switch (ev.GetEvent())
             {
@@ -260,7 +263,7 @@ public class FootballTimelineTests
                 case FootballerInjuredPayload: injuries++; break;
                 case FootballCardPayload: cards++; break;
             }
-        });
+        }
 
         Assert.That(goals, Is.EqualTo(1));
         Assert.That(injuries, Is.EqualTo(2));

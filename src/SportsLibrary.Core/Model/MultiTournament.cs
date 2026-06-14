@@ -59,8 +59,8 @@ namespace SportsLibrary.Core
         {
             var initial = TournamentStrategy.CreateSubTournaments(_contestants);
             _subTournaments.AddRange(initial);
-            // foreach (var t in _subTournaments)
-            //     t.Start();
+            foreach (var t in _subTournaments)
+                t.Start();
         }
 
         /// <summary>

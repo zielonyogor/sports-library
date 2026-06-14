@@ -72,10 +72,11 @@ public class NewPayloadTests
     {
         var red = T("Red");
         var blue = T("Blue");
-        var match = new Match("Final", new[] { red, blue });
         var t = new DateTime(2024, 7, 15, 17, 0, 0);
+        var match = new Match("Final", new[] { red, blue }, t.AddMinutes(-1));
+        match.Start(t);
 
-        match.RecordEvent(new InGameEvent(t, new FootballPeriodPayload { Period = MatchPeriod.PenaltyShootout }));
+        match.RecordEvent(new InGameEvent(t.AddSeconds(1), new FootballPeriodPayload { Period = MatchPeriod.PenaltyShootout }));
         // Red scores, Blue scores, Red scores, Blue misses, Red scores
         match.RecordEvent(new InGameEvent(t.AddSeconds(30), new FootballPenaltyPayload { Contestant = red, Scored = true }));
         match.RecordEvent(new InGameEvent(t.AddSeconds(60), new FootballPenaltyPayload { Contestant = blue, Scored = true }));
@@ -85,14 +86,14 @@ public class NewPayloadTests
 
         var scored = new Dictionary<IContestant, int>();
         var missed = new Dictionary<IContestant, int>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             if (ev.GetEvent() is FootballPenaltyPayload p && p.Contestant != null)
             {
                 if (p.Scored) { scored.TryGetValue(p.Contestant, out var s); scored[p.Contestant] = s + 1; }
                 else { missed.TryGetValue(p.Contestant, out var m); missed[p.Contestant] = m + 1; }
             }
-        });
+        }
 
         Assert.That(scored[red], Is.EqualTo(3));
         Assert.That(scored[blue], Is.EqualTo(1));

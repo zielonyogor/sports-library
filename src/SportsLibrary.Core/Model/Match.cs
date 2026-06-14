@@ -7,57 +7,48 @@ namespace SportsLibrary.Core
     /// </summary>
     public sealed class Match
     {
-        private static readonly IMatchResultStrategy DefaultResultStrategy = new PenaltyPresentMatchResultStrategy();
-        private static readonly IReadOnlyDictionary<MatchState, HashSet<MatchState>> AllowedTransitions =
-            new Dictionary<MatchState, HashSet<MatchState>>
-            {
-                [MatchState.Scheduled] = new() { MatchState.InProgress, MatchState.Cancelled, MatchState.Rejected, MatchState.Rescheduled },
-                [MatchState.InProgress] = new() { MatchState.Paused, MatchState.Finished, MatchState.Cancelled, MatchState.Rejected },
-                [MatchState.Paused] = new() { MatchState.InProgress, MatchState.Cancelled, MatchState.Rejected, MatchState.Rescheduled },
-                [MatchState.Rescheduled] = new() { MatchState.Scheduled, MatchState.Cancelled, MatchState.Rejected },
-                [MatchState.Finished] = new(),
-                [MatchState.Cancelled] = new(),
-                [MatchState.Rejected] = new(),
-            };
-
         private readonly List<IContestant> _contestants;
+        private readonly MatchStateTracker _stateTracker;
+        private readonly MatchStatisticsTracker _statisticsTracker;
+        private readonly PenaltyWinnerTracker _penaltyWinnerTracker;
+        private readonly MatchStateTransitionPolicy _transitionPolicy;
 
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; set; }
-        public MatchState State => Timeline.CurrentState;
+        public MatchState State => _stateTracker.CurrentState;
         public IReadOnlyList<IContestant> Contestants => _contestants;
         public IMatchResultStrategy ResultStrategy { get; }
         public Timeline Timeline => _timeline;
         private Timeline _timeline { get; } = new();
+        public IReadOnlyDictionary<IContestant, IScore> Statistics => _statisticsTracker.Statistics;
+        public IContestant? PenaltyWinner => _penaltyWinnerTracker.Winner;
 
-        public IReadOnlyDictionary<IContestant, IScore> Statistics
-        {
-            get
-            {
-                var acc = new Dictionary<IContestant, IScore>();
-                foreach (var ev in _timeline.Events.OrderBy(e => e.Timestamp))
-                    if (ev.GetEvent() is IScoreEventPayload s && s.Contestant is { } c)
-                        acc[c] = s.Apply(acc.GetValueOrDefault(c));
-                return acc;
-            }
-        }
-
-        public IContestant? PenaltyWinner =>
-            _timeline.Events
-                .OrderBy(e => e.Timestamp)
-                .Select(e => e.GetEvent())
-                .OfType<IPenaltyWinnerEventPayload>()
-                .LastOrDefault()?.Winner;
-
-        public Match(string name, IEnumerable<IContestant> contestants, DateTime scheduledDate, IMatchResultStrategy? resultStrategy = null)
+        public Match(
+            string name,
+            IEnumerable<IContestant> contestants,
+            DateTime scheduledDate,
+            IMatchResultStrategy? resultStrategy = null)
         {
             Name = name;
             _contestants = new List<IContestant>(contestants);
-            ResultStrategy = resultStrategy ?? DefaultResultStrategy;
-            AppendEvent(new ScheduledMatchStateEventPayload(scheduledDate), DateTime.UtcNow, skipTransitionValidation: true);
+            ResultStrategy = resultStrategy ?? new PenaltyPresentMatchResultStrategy();
+            _transitionPolicy = new MatchStateTransitionPolicy();
+
+            _stateTracker = new MatchStateTracker(MatchState.Scheduled);
+            _statisticsTracker = new MatchStatisticsTracker();
+            _penaltyWinnerTracker = new PenaltyWinnerTracker();
+
+            _timeline.Subscribe(_stateTracker);
+            _timeline.Subscribe(_statisticsTracker);
+            _timeline.Subscribe(_penaltyWinnerTracker);
+
+            AppendEvent(new ScheduledMatchStateEventPayload(scheduledDate), scheduledDate, skipTransitionValidation: true);
         }
 
-        public Match(string name, IEnumerable<IContestant> contestants, IMatchResultStrategy? resultStrategy = null)
+        public Match(
+            string name,
+            IEnumerable<IContestant> contestants,
+            IMatchResultStrategy? resultStrategy = null)
             : this(name, contestants, DateTime.UtcNow, resultStrategy)
         {
         }
@@ -111,7 +102,7 @@ namespace SportsLibrary.Core
             AppendEvent(new RescheduledMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
 
         public IScore? GetCurrentScore(IContestant contestant) =>
-            Statistics.TryGetValue(contestant, out var score) ? score : null;
+            _statisticsTracker.GetCurrentScore(contestant);
 
         public IContestant? GetWinner() => ResultStrategy.DetermineWinner(this);
 
@@ -142,6 +133,9 @@ namespace SportsLibrary.Core
             if (payload is IMatchStateEventPayload)
                 return;
 
+            if (payload is ScoreSetEventPayload && State == MatchState.Scheduled)
+                return;
+
             if (payload is IPenaltyWinnerEventPayload)
             {
                 if (State is MatchState.InProgress or MatchState.Paused or MatchState.Finished)
@@ -159,7 +153,7 @@ namespace SportsLibrary.Core
         private void ValidateTransition(MatchState targetState)
         {
             var currentState = State;
-            if (!AllowedTransitions.TryGetValue(currentState, out var allowed) || !allowed.Contains(targetState))
+            if (!_transitionPolicy.IsTransitionAllowed(currentState, targetState))
                 throw new InvalidOperationException($"Invalid match state transition from {currentState} to {targetState}.");
         }
     }

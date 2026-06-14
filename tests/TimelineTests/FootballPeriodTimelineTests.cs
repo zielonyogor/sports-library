@@ -14,8 +14,9 @@ public class FootballPeriodTimelineTests
     [Test]
     public void Timeline_PeriodSequence_ReplayedInOrder()
     {
-        var match = new Match("Final", new[] { C("Red"), C("Blue") });
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
+        var match = new Match("Final", new[] { C("Red"), C("Blue") }, t.AddMinutes(-1));
+        match.Start(t);
 
         match.RecordEvent(new InGameEvent(t, new FootballPeriodPayload { Period = MatchPeriod.FirstHalf }));
         match.RecordEvent(new InGameEvent(t.AddMinutes(45), new FootballPeriodPayload { Period = MatchPeriod.HalfTime }));
@@ -23,11 +24,11 @@ public class FootballPeriodTimelineTests
         match.RecordEvent(new InGameEvent(t.AddMinutes(105), new FootballPeriodPayload { Period = MatchPeriod.FullTime }));
 
         var periods = new List<MatchPeriod>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             if (ev.GetEvent() is FootballPeriodPayload p)
                 periods.Add(p.Period);
-        });
+        }
 
         Assert.That(periods, Is.EqualTo(new[]
         {
@@ -41,8 +42,9 @@ public class FootballPeriodTimelineTests
     {
         var red = C("Red");
         var blue = C("Blue");
-        var match = new Match("Group A", new[] { red, blue });
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
+        var match = new Match("Group A", new[] { red, blue }, t.AddMinutes(-1));
+        match.Start(t);
 
         // FirstHalf: Red scores at 22'
         match.RecordEvent(new InGameEvent(t, new FootballPeriodPayload { Period = MatchPeriod.FirstHalf }));
@@ -56,7 +58,7 @@ public class FootballPeriodTimelineTests
 
         var currentPeriod = MatchPeriod.FirstHalf;
         var goalsByPeriod = new Dictionary<MatchPeriod, int>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             switch (ev.GetEvent())
             {
@@ -68,7 +70,7 @@ public class FootballPeriodTimelineTests
                     goalsByPeriod[currentPeriod] = n + 1;
                     break;
             }
-        });
+                }
 
         Assert.That(goalsByPeriod[MatchPeriod.FirstHalf], Is.EqualTo(1));
         Assert.That(goalsByPeriod[MatchPeriod.SecondHalf], Is.EqualTo(2));
@@ -79,8 +81,9 @@ public class FootballPeriodTimelineTests
     {
         var red = C("Red");
         var blue = C("Blue");
-        var match = new Match("Semifinal", new[] { red, blue });
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
+        var match = new Match("Semifinal", new[] { red, blue }, t.AddMinutes(-1));
+        match.Start(t);
 
         match.RecordEvent(new InGameEvent(t, new FootballPeriodPayload { Period = MatchPeriod.FirstHalf }));
         match.RecordEvent(new InGameEvent(t.AddMinutes(45), new FootballPeriodPayload { Period = MatchPeriod.HalfTime }));
@@ -92,7 +95,7 @@ public class FootballPeriodTimelineTests
 
         var currentPeriod = MatchPeriod.FirstHalf;
         IContestant? extraTimeScorer = null;
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             switch (ev.GetEvent())
             {
@@ -103,7 +106,7 @@ public class FootballPeriodTimelineTests
                     extraTimeScorer = g.Contestant;
                     break;
             }
-        });
+            }
 
         Assert.That(extraTimeScorer, Is.SameAs(red));
     }

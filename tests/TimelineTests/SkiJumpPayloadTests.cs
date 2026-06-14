@@ -47,8 +47,9 @@ public class SkiJumpPayloadTests
         var dawid = C("Dawid");
         var stefan = C("Stefan");
 
-        var match = new Match("Qualification", new[] { kamil, dawid, stefan });
         var base_ = new DateTime(2024, 1, 28, 10, 0, 0);
+        var match = new Match("Qualification", new[] { kamil, dawid, stefan }, base_.AddMinutes(-1));
+        match.Start(base_);
 
         match.RecordEvent(new InGameEvent(base_.AddMinutes(0), new SkiJumpPayload
         {
@@ -67,11 +68,11 @@ public class SkiJumpPayloadTests
         }));
 
         var results = new Dictionary<IContestant, double>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             if (ev.GetEvent() is SkiJumpPayload jump && jump.Contestant != null)
                 results[jump.Contestant] = jump.Score?.GetValue() ?? 0;
-        });
+        }
 
         var winner = results.OrderByDescending(kv => kv.Value).First().Key;
         Assert.That(winner.Name, Is.EqualTo("Dawid"));
@@ -81,8 +82,9 @@ public class SkiJumpPayloadTests
     public void Timeline_SecondRoundJump_OverwritesBestScore()
     {
         var kamil = C("Kamil");
-        var match = new Match("Final", new[] { kamil });
         var base_ = new DateTime(2024, 1, 28, 10, 0, 0);
+        var match = new Match("Final", new[] { kamil }, base_.AddMinutes(-1));
+        match.Start(base_);
 
         match.RecordEvent(new InGameEvent(base_.AddMinutes(0), new SkiJumpPayload
         {
@@ -96,14 +98,14 @@ public class SkiJumpPayloadTests
         }));
 
         var totals = new Dictionary<IContestant, double>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             if (ev.GetEvent() is SkiJumpPayload jump && jump.Contestant != null)
             {
                 totals.TryGetValue(jump.Contestant, out var current);
                 totals[jump.Contestant] = current + (jump.Score?.GetValue() ?? 0);
             }
-        });
+        }
 
         // 174 + 193.5 = 367.5
         Assert.That(totals[kamil], Is.EqualTo(367.5).Within(0.01));

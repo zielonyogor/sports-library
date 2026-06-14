@@ -130,6 +130,14 @@ public class MatchTests
     {
         var m = new Match("M", new[] { C("A") });
         Assert.That(m.Timeline.Events, Has.Count.EqualTo(1));
-        Assert.That(m.Timeline.CurrentState, Is.EqualTo(MatchState.Scheduled));
+        Assert.That(m.State, Is.EqualTo(MatchState.Scheduled));
+    }
+
+    [Test]
+    public void Transition_DefaultPolicy_InvalidTransitionThrows()
+    {
+        var m = new Match("M", new[] { C("A") });
+
+        Assert.Throws<InvalidOperationException>(() => m.Finish());
     }
 }

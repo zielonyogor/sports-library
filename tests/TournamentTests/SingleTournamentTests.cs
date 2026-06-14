@@ -84,11 +84,11 @@ public class SingleTournamentTests
     }
 
     [Test]
-    public void End_WithoutRankingStrategy_Throws()
+    public void End_WithDefaultRankingStrategy_DoesNotThrow()
     {
         var t = MakeTournament("T", new FootballGroupStageStrategy(), Teams("A", "B"));
         t.Start();
-        Assert.Throws<InvalidOperationException>(() => t.End());
+        Assert.DoesNotThrow(() => t.End());
     }
 
     [Test]

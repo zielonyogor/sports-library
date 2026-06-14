@@ -16,10 +16,12 @@ public class TimelineNewFeaturesTests
     [Test]
     public void GetEventsByPayloadType_ReturnsOnlyMatchingPayloads()
     {
-        var match = M(C("Red"), C("Blue"));
-        var t = DateTime.Now;
         var red = C("Red");
+        var blue = C("Blue");
+        var match = M(red, blue);
+        var t = DateTime.Now;
         var referee = R("Referee");
+        match.Start(t.AddMinutes(-1));
         match.RecordEvent(new FootballGoalPayload { Contestant = red, Minute = 10 }, t);
         match.RecordEvent(new FootballCardPayload { Contestant = red, CardType = CardType.Yellow, Minute = 15, Referee = referee }, t.AddMinutes(5));
         match.RecordEvent(new FootballGoalPayload { Contestant = red, Minute = 20 }, t.AddMinutes(10));
@@ -33,9 +35,12 @@ public class TimelineNewFeaturesTests
     [Test]
     public void GetEventsByPayloadType_NoMatchingPayloads_ReturnsEmpty()
     {
-        var match = M(C("Red"));
+        var red = C("Red");
+        var match = M(red);
         var referee = R("Referee");
-        match.RecordEvent(new FootballCardPayload { Contestant = C("Red"), CardType = CardType.Yellow, Minute = 15, Referee = referee }, DateTime.Now);
+        var t = DateTime.Now;
+        match.Start(t.AddMinutes(-1));
+        match.RecordEvent(new FootballCardPayload { Contestant = red, CardType = CardType.Yellow, Minute = 15, Referee = referee }, t);
 
         var goals = match.Timeline.GetEventsByPayloadType<FootballGoalPayload>();
 
