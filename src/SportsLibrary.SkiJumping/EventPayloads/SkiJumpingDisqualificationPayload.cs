@@ -5,7 +5,7 @@ namespace SportsLibrary.SkiJumping
     /// <summary>
     /// Emitted when a contestant is disqualified during a ski jumping competition.
     /// </summary>
-    public sealed class SkiJumpingDisqualificationPayload : IEventPayload
+    public sealed class SkiJumpingDisqualificationPayload : IContestantEventPayload
     {
         /// <summary>The contestant who was disqualified.</summary>
         public IContestant? Contestant { get; init; }

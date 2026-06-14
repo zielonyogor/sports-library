@@ -16,6 +16,9 @@ public class FootballBracketStageStrategyTests
 
     private static void Win(Match match, IContestant winner, int winnerGoals = 1, int loserGoals = 0)
     {
+        if (match.State == MatchState.Scheduled)
+            match.Start();
+
         var loser = match.Contestants.First(c => c != winner);
         match.SetScore(winner, new FootballMatchScore(winnerGoals, MatchOutcome.Win));
         match.SetScore(loser, new FootballMatchScore(loserGoals, MatchOutcome.Lose));
@@ -23,9 +26,12 @@ public class FootballBracketStageStrategyTests
 
     private static void Draw(Match match, IContestant penaltyWinner)
     {
+        if (match.State == MatchState.Scheduled)
+            match.Start();
+
         foreach (var c in match.Contestants)
             match.SetScore(c, new FootballMatchScore(1, MatchOutcome.Draw));
-        ((Match)match).AssignPenaltyWinner(penaltyWinner);
+        match.AssignPenaltyWinner(penaltyWinner);
     }
 
     [Test]
@@ -93,7 +99,7 @@ public class FootballBracketStageStrategyTests
     {
         var strategy = new FootballBracketStageStrategy();
         var round1 = strategy.CreateMatches(Teams("Red", "Blue"));
-        Win(round1[0], T("Red"));
+        Win(round1[0], round1[0].Contestants[0]);
 
         var round2 = strategy.CreateNextRound(round1);
 

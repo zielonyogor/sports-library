@@ -14,7 +14,11 @@ namespace SportsLibrary.Football
             for (int g = 0; g < GroupCount; g++)
             {
                 var groupTeams = contestants.Skip(g * TeamsPerGroup).Take(TeamsPerGroup);
-                var group = new SingleTournament($"Group {(char)('A' + g)}", new FootballGroupStageStrategy(), groupTeams);
+                var group = new SingleTournament(
+                    $"Group {(char)('A' + g)}",
+                    new FootballGroupStageStrategy(),
+                    groupTeams,
+                    new FootballGroupRankingStrategy());
                 groups.Add(group);
             }
             return groups;
@@ -32,7 +36,11 @@ namespace SportsLibrary.Football
                     .Select(kvp => kvp.Key))
                 .ToList();
 
-            var bracket = new SingleTournament("Bracket Stage", new FootballBracketStageStrategy(), advancing);
+            var bracket = new SingleTournament(
+                "Bracket Stage",
+                new FootballBracketStageStrategy(),
+                advancing,
+                new DescendingScoreRankingStrategy());
             return new List<ITournament> { bracket };
         }
 

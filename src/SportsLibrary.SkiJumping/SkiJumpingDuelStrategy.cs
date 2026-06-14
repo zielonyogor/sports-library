@@ -8,6 +8,7 @@ namespace SportsLibrary.SkiJumping
     /// </summary>
     public sealed class SkiJumpingDuelStrategy : IMatchesStrategy
     {
+        private static readonly IMatchResultStrategy MatchResultStrategy = new HighestScoreWinsMatchResultStrategy();
         private readonly IRandomProvider _random;
         private bool _finalCreated;
 
@@ -28,7 +29,7 @@ namespace SportsLibrary.SkiJumping
             var shuffled = contestants.OrderBy(_ => _random.Next()).ToList();
             var matches = new List<Match>();
             for (int i = 0; i + 1 < shuffled.Count; i += 2)
-                matches.Add(new Match($"Duel {i / 2 + 1}", new[] { shuffled[i], shuffled[i + 1] }));
+                matches.Add(new Match($"Duel {i / 2 + 1}", new[] { shuffled[i], shuffled[i + 1] }, MatchResultStrategy));
             return matches;
         }
 
@@ -63,7 +64,7 @@ namespace SportsLibrary.SkiJumping
 
             var finalists = winners.Concat(top5Losers).ToList();
             _finalCreated = true;
-            return new List<Match> { new Match("Final", finalists) };
+            return new List<Match> { new Match("Final", finalists, MatchResultStrategy) };
         }
     }
 }

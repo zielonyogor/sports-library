@@ -1,6 +1,6 @@
 namespace SportsLibrary.Core
 {
-    public sealed class MultiTournament : ITournament
+    public sealed class MultiTournament : ITournament, IStageAdvancingTournament
     {
         private readonly List<IContestant> _contestants;
         private readonly List<ITournament> _subTournaments = new();
@@ -54,6 +54,13 @@ namespace SportsLibrary.Core
             _subTournaments.AddRange(next);
             foreach (var t in next)
                 t.Start();
+        }
+
+        public bool Advance()
+        {
+            var beforeCount = _subTournaments.Count;
+            AdvanceToNextStage();
+            return _subTournaments.Count > beforeCount;
         }
 
         public void End()

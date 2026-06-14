@@ -5,7 +5,7 @@ namespace SportsLibrary.Football
     /// <summary>
     /// Payload for attempt at a penalty kick.
     /// </summary>
-    public sealed class FootballPenaltyPayload : IEventPayload
+    public sealed class FootballPenaltyPayload : IContestantEventPayload
     {
         /// <summary>The player taking the penalty.</summary>
         public IContestant? Contestant { get; init; }

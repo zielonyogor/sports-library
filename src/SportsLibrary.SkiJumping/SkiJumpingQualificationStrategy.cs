@@ -7,12 +7,13 @@ namespace SportsLibrary.SkiJumping
     /// </summary>
     public sealed class SkiJumpingQualificationStrategy : IMatchesStrategy
     {
+        private static readonly IMatchResultStrategy MatchResultStrategy = new HighestScoreWinsMatchResultStrategy();
         private bool _finalCreated;
 
         public IReadOnlyList<Match> CreateMatches(IReadOnlyList<IContestant> contestants)
         {
             _finalCreated = false;
-            return new List<Match> { new Match("Qualification", contestants) };
+            return new List<Match> { new Match("Qualification", contestants, MatchResultStrategy) };
         }
 
         public IReadOnlyList<Match>? CreateNextRound(IReadOnlyList<Match> completedMatches)
@@ -28,7 +29,7 @@ namespace SportsLibrary.SkiJumping
                 .ToList();
 
             _finalCreated = true;
-            return new List<Match> { new Match("Finals", top30) };
+            return new List<Match> { new Match("Finals", top30, MatchResultStrategy) };
         }
     }
 }

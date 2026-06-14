@@ -5,7 +5,13 @@ namespace SportsLibrary.Football
     /// <summary>Single-elimination bracket. Draws resolved by PenaltyWinner on the concrete Match.</summary>
     public sealed class FootballBracketStageStrategy : IMatchesStrategy
     {
+        private readonly IMatchResultStrategy _matchResultStrategy;
         private int _roundNumber;
+
+        public FootballBracketStageStrategy(IMatchResultStrategy? matchResultStrategy = null)
+        {
+            _matchResultStrategy = matchResultStrategy ?? new PenaltyAwareMatchResultStrategy();
+        }
 
         public IReadOnlyList<Match> CreateMatches(IReadOnlyList<IContestant> contestants)
         {
@@ -16,7 +22,7 @@ namespace SportsLibrary.Football
         public IReadOnlyList<Match>? CreateNextRound(IReadOnlyList<Match> completedMatches)
         {
             var winners = completedMatches
-                .Select(GetMatchWinner)
+                .Select(match => match.GetWinner())
                 .Where(w => w != null)
                 .Select(w => w!)
                 .ToList();
@@ -33,27 +39,10 @@ namespace SportsLibrary.Football
             for (int i = 0; i + 1 < contestants.Count; i += 2)
             {
                 matches.Add(new Match($"Round {_roundNumber} Match {i / 2 + 1}",
-                    new[] { contestants[i], contestants[i + 1] }));
+                    new[] { contestants[i], contestants[i + 1] },
+                    _matchResultStrategy));
             }
             return matches;
-        }
-
-        private static IContestant? GetMatchWinner(Match match)
-        {
-            var scored = match.Contestants
-                .Select(c => (c, match.Statistics.TryGetValue(c, out var s) ? s.GetValue() : 0d))
-                .OrderByDescending(x => x.Item2)
-                .ToList();
-
-            if (scored.Count < 2) return scored.FirstOrDefault().c;
-
-            if (scored[0].Item2 == scored[1].Item2)
-            {
-                // Draw — check for a penalty winner on the concrete Match type
-                return match is Match m ? m.PenaltyWinner : scored[0].c;
-            }
-
-            return scored[0].c;
         }
     }
 }

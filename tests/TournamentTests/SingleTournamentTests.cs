@@ -17,6 +17,9 @@ public class SingleTournamentTests
     private static SingleTournament MakeTournament(string name, IMatchesStrategy strategy, IEnumerable<IContestant>? contestants = null) =>
         new SingleTournament(name, strategy, contestants ?? Enumerable.Empty<IContestant>());
 
+    private static SingleTournament MakeRankedTournament(string name, IMatchesStrategy strategy, IEnumerable<IContestant>? contestants = null) =>
+        new SingleTournament(name, strategy, contestants ?? Enumerable.Empty<IContestant>(), new FootballGroupRankingStrategy());
+
     [Test]
     public void Id_UniquePerInstance()
     {
@@ -81,11 +84,39 @@ public class SingleTournamentTests
     }
 
     [Test]
-    public void End_DoesNotThrow()
+    public void End_WithoutRankingStrategy_Throws()
     {
         var t = MakeTournament("T", new FootballGroupStageStrategy(), Teams("A", "B"));
         t.Start();
-        Assert.DoesNotThrow(() => t.End());
+        Assert.Throws<InvalidOperationException>(() => t.End());
+    }
+
+    [Test]
+    public void End_WithRankingStrategy_RanksResults()
+    {
+        var teams = Teams("A", "B", "C");
+        var t = MakeRankedTournament("T", new FootballGroupStageStrategy(), teams);
+        t.Start();
+        t.SetResult(teams[0], new FootballLeaderboardScore(wins: 1, draws: 0, losses: 0, goalsScored: 1, goalsConceded: 0));
+        t.SetResult(teams[1], new FootballLeaderboardScore(wins: 2, draws: 0, losses: 0, goalsScored: 4, goalsConceded: 1));
+        t.SetResult(teams[2], new FootballLeaderboardScore(wins: 0, draws: 1, losses: 1, goalsScored: 1, goalsConceded: 3));
+
+        t.End();
+
+        Assert.That(t.TournamentResults.Keys.First(), Is.SameAs(teams[1]));
+    }
+
+    [Test]
+    public void Advance_CanBeDrivenThroughSharedInterface()
+    {
+        IStageAdvancingTournament t = new SingleTournament(
+            "T",
+            new SkiJumpingQualificationStrategy(),
+            Enumerable.Range(1, 50).Select(i => T($"A{i}")));
+
+        ((ITournament)t).Start();
+
+        Assert.That(t.Advance(), Is.True);
     }
 
     [Test]

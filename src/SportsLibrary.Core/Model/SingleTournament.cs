@@ -4,7 +4,7 @@ namespace SportsLibrary.Core
     /// Represents a single tournament which is a set of consecutive matches between contestants, 
     /// following a specific matches strategy. 
     /// </summary>
-    public sealed class SingleTournament : ITournament
+    public sealed class SingleTournament : ITournament, IStageAdvancingTournament
     {
         private readonly List<IContestant> _contestants;
         private readonly List<Match> _matches = new();
@@ -51,6 +51,12 @@ namespace SportsLibrary.Core
 
         public void Start()
         {
+            if (_rankingStrategy is not null)
+            {
+                foreach (var (contestant, score) in _rankingStrategy.InitializeScores(_contestants))
+                    _results.TryAdd(contestant, score);
+            }
+
             _matches.AddRange(MatchesStrategy.CreateMatches(_contestants));
         }
 
@@ -62,9 +68,13 @@ namespace SportsLibrary.Core
             return next;
         }
 
+        public bool Advance() => AdvanceRound().Count > 0;
+
         public void End()
         {
-            if (_rankingStrategy is null) return;
+            if (_rankingStrategy is null)
+                throw new InvalidOperationException($"Tournament '{Name}' cannot be ended without a ranking strategy.");
+
             var ranked = _rankingStrategy.Rank(new Dictionary<IContestant, IScore>(_results));
             _results.Clear();
             foreach (var (contestant, score) in ranked)

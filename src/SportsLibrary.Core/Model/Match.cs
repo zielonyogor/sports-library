@@ -7,6 +7,7 @@ namespace SportsLibrary.Core
     /// </summary>
     public sealed class Match
     {
+        private static readonly IMatchResultStrategy DefaultResultStrategy = new PenaltyAwareMatchResultStrategy();
         private static readonly IReadOnlyDictionary<MatchState, HashSet<MatchState>> AllowedTransitions =
             new Dictionary<MatchState, HashSet<MatchState>>
             {
@@ -25,6 +26,7 @@ namespace SportsLibrary.Core
         public string Name { get; set; }
         public MatchState State => Timeline.CurrentState;
         public IReadOnlyList<IContestant> Contestants => _contestants;
+        public IMatchResultStrategy ResultStrategy { get; }
         public Timeline Timeline => _timeline;
         private Timeline _timeline { get; } = new();
 
@@ -42,20 +44,21 @@ namespace SportsLibrary.Core
 
         public IContestant? PenaltyWinner =>
             _timeline.Events
-                .OrderByDescending(e => e.Timestamp)
+                .OrderBy(e => e.Timestamp)
                 .Select(e => e.GetEvent())
                 .OfType<IPenaltyWinnerEventPayload>()
-                .FirstOrDefault()?.Winner;
+                .LastOrDefault()?.Winner;
 
-        public Match(string name, IEnumerable<IContestant> contestants, DateTime scheduledDate)
+        public Match(string name, IEnumerable<IContestant> contestants, DateTime scheduledDate, IMatchResultStrategy? resultStrategy = null)
         {
             Name = name;
             _contestants = new List<IContestant>(contestants);
+            ResultStrategy = resultStrategy ?? DefaultResultStrategy;
             AppendEvent(new ScheduledMatchStateEventPayload(scheduledDate), DateTime.UtcNow, skipTransitionValidation: true);
         }
 
-        public Match(string name, IEnumerable<IContestant> contestants)
-            : this(name, contestants, DateTime.UtcNow)
+        public Match(string name, IEnumerable<IContestant> contestants, IMatchResultStrategy? resultStrategy = null)
+            : this(name, contestants, DateTime.UtcNow, resultStrategy)
         {
         }
 
@@ -110,22 +113,47 @@ namespace SportsLibrary.Core
         public IScore? GetCurrentScore(IContestant contestant) =>
             Statistics.TryGetValue(contestant, out var score) ? score : null;
 
-        public IContestant? GetWinner()
-        {
-            var stats = Statistics;
-            if (stats.Count == 0) return null;
-            var ranked = stats.OrderByDescending(kv => kv.Value.GetValue()).ToList();
-            if (ranked.Count >= 2 && ranked[0].Value.GetValue() == ranked[1].Value.GetValue())
-                return PenaltyWinner;
-            return ranked[0].Key;
-        }
+        public IContestant? GetWinner() => ResultStrategy.DetermineWinner(this);
 
         private void AppendEvent(IEventPayload payload, DateTime timestamp, bool skipTransitionValidation)
         {
+            ValidatePayload(payload);
+
             if (!skipTransitionValidation && payload is IMatchStateEventPayload statePayload)
                 ValidateTransition(statePayload.ResultingState);
 
+            if (!skipTransitionValidation)
+                ValidateEventAllowedInCurrentState(payload);
+
             _timeline.AddEvent(new InGameEvent(timestamp, payload));
+        }
+
+        private void ValidatePayload(IEventPayload payload)
+        {
+            if (payload is IContestantEventPayload contestantPayload && contestantPayload.Contestant is not null && !_contestants.Contains(contestantPayload.Contestant))
+                throw new ArgumentException("Contestant must be one of the match contestants.", nameof(payload));
+
+            if (payload is IPenaltyWinnerEventPayload penaltyPayload && !_contestants.Contains(penaltyPayload.Winner))
+                throw new ArgumentException("Penalty winner must be one of the match contestants.", nameof(payload));
+        }
+
+        private void ValidateEventAllowedInCurrentState(IEventPayload payload)
+        {
+            if (payload is IMatchStateEventPayload)
+                return;
+
+            if (payload is IPenaltyWinnerEventPayload)
+            {
+                if (State is MatchState.InProgress or MatchState.Paused or MatchState.Finished)
+                    return;
+
+                throw new InvalidOperationException($"Cannot record a penalty resolution while the match is {State}.");
+            }
+
+            if (State is MatchState.InProgress or MatchState.Paused)
+                return;
+
+            throw new InvalidOperationException($"Cannot record match events while the match is {State}.");
         }
 
         private void ValidateTransition(MatchState targetState)
