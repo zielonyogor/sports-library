@@ -101,6 +101,39 @@ public class FootballWorldCupStrategyTests
     }
 
     [Test]
+    public void CreateNextStage_UsesFootballTieBreaks_NotPointsOnly()
+    {
+        var strategy = new FootballWorldCupStrategy();
+        var groups = strategy.CreateSubTournaments(Make32Teams());
+
+        var groupA = groups[0];
+        var a = groupA.Contestants[0];
+        var b = groupA.Contestants[1];
+        var c = groupA.Contestants[2];
+        var d = groupA.Contestants[3];
+
+        // A and B have equal points, but A has better goal difference and should rank above B.
+        groupA.SetResult(a, new FootballLeaderboardScore(wins: 2, draws: 0, losses: 1, goalsScored: 5, goalsConceded: 1));
+        groupA.SetResult(b, new FootballLeaderboardScore(wins: 2, draws: 0, losses: 1, goalsScored: 3, goalsConceded: 2));
+        groupA.SetResult(c, new FootballLeaderboardScore(wins: 1, draws: 0, losses: 2, goalsScored: 2, goalsConceded: 4));
+        groupA.SetResult(d, new FootballLeaderboardScore(wins: 0, draws: 0, losses: 3, goalsScored: 1, goalsConceded: 4));
+
+        // Provide deterministic results for remaining groups so bracket can be created.
+        for (int i = 1; i < groups.Count; i++)
+        {
+            var g = groups[i];
+            for (int j = 0; j < g.Contestants.Count; j++)
+                g.SetResult(g.Contestants[j],
+                    new FootballLeaderboardScore(wins: g.Contestants.Count - j, draws: 0, losses: 0));
+        }
+
+        var bracket = strategy.CreateNextStage(groups)![0];
+
+        Assert.That(bracket.Contestants, Contains.Item(a));
+        Assert.That(bracket.Contestants, Contains.Item(b));
+    }
+
+    [Test]
     public void CreateNextStage_SecondCall_ReturnsNull()
     {
         var strategy = new FootballWorldCupStrategy();

@@ -7,6 +7,7 @@ namespace SportsLibrary.Football
         private const int GroupCount = 8;
         private const int TeamsPerGroup = 4;
         private const int AdvancingPerGroup = 2;
+        private static readonly FootballGroupRankingStrategy GroupRanking = new();
 
         public IReadOnlyList<ITournament> CreateSubTournaments(IReadOnlyList<IContestant> contestants)
         {
@@ -30,10 +31,10 @@ namespace SportsLibrary.Football
             if (completedTournaments.Any(t => t.Name == "Bracket Stage")) return null;
 
             var advancing = completedTournaments
-                .SelectMany(t => t.TournamentResults
-                    .OrderByDescending(kvp => kvp.Value.GetValue())
+                .SelectMany(t => GroupRanking
+                    .Rank(t.TournamentResults)
                     .Take(AdvancingPerGroup)
-                    .Select(kvp => kvp.Key))
+                    .Select(entry => entry.Contestant))
                 .ToList();
 
             var bracket = new SingleTournament(

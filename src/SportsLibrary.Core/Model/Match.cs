@@ -7,7 +7,7 @@ namespace SportsLibrary.Core
     /// </summary>
     public sealed class Match
     {
-        private static readonly IMatchResultStrategy DefaultResultStrategy = new PenaltyAwareMatchResultStrategy();
+        private static readonly IMatchResultStrategy DefaultResultStrategy = new PenaltyPresentMatchResultStrategy();
         private static readonly IReadOnlyDictionary<MatchState, HashSet<MatchState>> AllowedTransitions =
             new Dictionary<MatchState, HashSet<MatchState>>
             {

@@ -3,7 +3,7 @@ namespace SportsLibrary.Core
     /// <summary>
     /// Determines a winner by score first, then falls back to the match penalty winner when scores are tied.
     /// </summary>
-    public sealed class PenaltyAwareMatchResultStrategy : IMatchResultStrategy
+    public sealed class PenaltyPresentMatchResultStrategy : IMatchResultStrategy
     {
         private readonly HighestScoreWinsMatchResultStrategy _inner = new();
 

@@ -10,7 +10,7 @@ namespace SportsLibrary.Football
 
         public FootballBracketStageStrategy(IMatchResultStrategy? matchResultStrategy = null)
         {
-            _matchResultStrategy = matchResultStrategy ?? new PenaltyAwareMatchResultStrategy();
+            _matchResultStrategy = matchResultStrategy ?? new PenaltyPresentMatchResultStrategy();
         }
 
         public IReadOnlyList<Match> CreateMatches(IReadOnlyList<IContestant> contestants)
