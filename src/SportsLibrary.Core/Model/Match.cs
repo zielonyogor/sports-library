@@ -11,7 +11,7 @@ namespace SportsLibrary.Core
         private readonly MatchStateTracker _stateTracker;
         private readonly MatchStatisticsTracker _statisticsTracker;
         private readonly PenaltyWinnerTracker _penaltyWinnerTracker;
-        private readonly MatchStateTransitionPolicy _transitionPolicy;
+        private readonly MatchEventValidationPolicy _eventValidationPolicy;
 
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; set; }
@@ -32,7 +32,7 @@ namespace SportsLibrary.Core
             Name = name;
             _contestants = new List<IContestant>(contestants);
             ResultStrategy = resultStrategy ?? new PenaltyPresentMatchResultStrategy();
-            _transitionPolicy = new MatchStateTransitionPolicy();
+            _eventValidationPolicy = new MatchEventValidationPolicy();
 
             _stateTracker = new MatchStateTracker();
             _statisticsTracker = new MatchStatisticsTracker();
@@ -108,52 +108,9 @@ namespace SportsLibrary.Core
 
         private void AppendEvent(IEventPayload payload, DateTime timestamp)
         {
-            ValidatePayload(payload);
-
-            if (payload is IMatchStateEventPayload statePayload)
-                ValidateTransition(statePayload.ResultingState);
-
-            ValidateEventAllowedInCurrentState(payload);
+            _eventValidationPolicy.EnsureCanAppend(payload, _stateTracker.CurrentState, _contestants);
 
             _timeline.AddEvent(new InGameEvent(timestamp, payload));
-        }
-
-        private void ValidatePayload(IEventPayload payload)
-        {
-            if (payload is IContestantEventPayload contestantPayload && contestantPayload.Contestant is not null && !_contestants.Contains(contestantPayload.Contestant))
-                throw new ArgumentException("Contestant must be one of the match contestants.", nameof(payload));
-
-            if (payload is IPenaltyWinnerEventPayload penaltyPayload && !_contestants.Contains(penaltyPayload.Winner))
-                throw new ArgumentException("Penalty winner must be one of the match contestants.", nameof(payload));
-        }
-
-        private void ValidateEventAllowedInCurrentState(IEventPayload payload)
-        {
-            if (payload is IMatchStateEventPayload)
-                return;
-
-            if (payload is ScoreSetEventPayload && State == MatchState.Scheduled)
-                return;
-
-            if (payload is IPenaltyWinnerEventPayload)
-            {
-                if (State is MatchState.InProgress or MatchState.Paused or MatchState.Finished)
-                    return;
-
-                throw new InvalidOperationException($"Cannot record a penalty resolution while the match is {State}.");
-            }
-
-            if (State is MatchState.InProgress or MatchState.Paused)
-                return;
-
-            throw new InvalidOperationException($"Cannot record match events while the match is {State}.");
-        }
-
-        private void ValidateTransition(MatchState targetState)
-        {
-            var currentState = _stateTracker.CurrentState;
-            if (!_transitionPolicy.IsTransitionAllowed(currentState, targetState))
-                throw new InvalidOperationException($"Invalid match state transition from {currentState} to {targetState}.");
         }
     }
 }
