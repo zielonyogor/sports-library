@@ -5,22 +5,35 @@ namespace SportsLibrary.Core
     /// of truth — <see cref="State"/>, <see cref="Statistics"/>, and <see cref="PenaltyWinner"/>
     /// are all projections of timeline events.
     /// </summary>
-    public sealed class Match : IMatch
+    public sealed class Match
     {
+        private static readonly IReadOnlyDictionary<MatchState, HashSet<MatchState>> AllowedTransitions =
+            new Dictionary<MatchState, HashSet<MatchState>>
+            {
+                [MatchState.Scheduled] = new() { MatchState.InProgress, MatchState.Cancelled, MatchState.Rejected, MatchState.Rescheduled },
+                [MatchState.InProgress] = new() { MatchState.Paused, MatchState.Finished, MatchState.Cancelled, MatchState.Rejected },
+                [MatchState.Paused] = new() { MatchState.InProgress, MatchState.Cancelled, MatchState.Rejected, MatchState.Rescheduled },
+                [MatchState.Rescheduled] = new() { MatchState.Scheduled, MatchState.Cancelled, MatchState.Rejected },
+                [MatchState.Finished] = new(),
+                [MatchState.Cancelled] = new(),
+                [MatchState.Rejected] = new(),
+            };
+
         private readonly List<IContestant> _contestants;
 
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; set; }
         public MatchState State => Timeline.CurrentState;
         public IReadOnlyList<IContestant> Contestants => _contestants;
-        public Timeline Timeline { get; } = new();
+        public Timeline Timeline => _timeline;
+        private Timeline _timeline { get; } = new();
 
         public IReadOnlyDictionary<IContestant, IScore> Statistics
         {
             get
             {
                 var acc = new Dictionary<IContestant, IScore>();
-                foreach (var ev in Timeline.Events.OrderBy(e => e.Timestamp))
+                foreach (var ev in _timeline.Events.OrderBy(e => e.Timestamp))
                     if (ev.GetEvent() is IScoreEventPayload s && s.Contestant is { } c)
                         acc[c] = s.Apply(acc.GetValueOrDefault(c));
                 return acc;
@@ -28,7 +41,7 @@ namespace SportsLibrary.Core
         }
 
         public IContestant? PenaltyWinner =>
-            Timeline.Events
+            _timeline.Events
                 .OrderByDescending(e => e.Timestamp)
                 .Select(e => e.GetEvent())
                 .OfType<IPenaltyWinnerEventPayload>()
@@ -38,18 +51,19 @@ namespace SportsLibrary.Core
         {
             Name = name;
             _contestants = new List<IContestant>(contestants);
-            Timeline.AddEvent(
-                new InGameEvent(DateTime.UtcNow, new ScheduledMatchStateEventPayload(scheduledDate))
-            );
+            AppendEvent(new ScheduledMatchStateEventPayload(scheduledDate), DateTime.UtcNow, skipTransitionValidation: true);
+        }
+
+        public Match(string name, IEnumerable<IContestant> contestants)
+            : this(name, contestants, DateTime.UtcNow)
+        {
         }
 
         public void SetScore(IContestant contestant, IScore score)
         {
             ArgumentNullException.ThrowIfNull(contestant);
             ArgumentNullException.ThrowIfNull(score);
-            Timeline.AddEvent(
-                new InGameEvent(DateTime.UtcNow, new ScoreSetEventPayload(contestant, score))
-            );
+            RecordEvent(new ScoreSetEventPayload(contestant, score));
         }
 
         public void AssignPenaltyWinner(IContestant winner)
@@ -57,10 +71,41 @@ namespace SportsLibrary.Core
             ArgumentNullException.ThrowIfNull(winner);
             if (!_contestants.Contains(winner))
                 throw new ArgumentException("Penalty winner must be one of the match contestants.", nameof(winner));
-            Timeline.AddEvent(
-                new InGameEvent(DateTime.UtcNow, new PenaltyWinnerAssignedPayload(winner))
-            );
+            RecordEvent(new PenaltyWinnerAssignedPayload(winner));
         }
+
+        public void RecordEvent(IEventPayload payload, DateTime? timestamp = null)
+        {
+            ArgumentNullException.ThrowIfNull(payload);
+            AppendEvent(payload, timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+        }
+
+        public void RecordEvent(IInGameEvent gameEvent)
+        {
+            ArgumentNullException.ThrowIfNull(gameEvent);
+            AppendEvent(gameEvent.GetEvent(), gameEvent.Timestamp, skipTransitionValidation: false);
+        }
+
+        public void Start(DateTime? timestamp = null) =>
+            AppendEvent(new InProgressMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+
+        public void Pause(DateTime? timestamp = null) =>
+            AppendEvent(new PausedMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+
+        public void Finish(DateTime? timestamp = null) =>
+            AppendEvent(new FinishedMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+
+        public void Cancel(DateTime? timestamp = null) =>
+            AppendEvent(new CancelledMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+
+        public void Reject(string reason, DateTime? timestamp = null)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+            AppendEvent(new RejectedMatchStateEventPayload(reason), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
+        }
+
+        public void Reschedule(DateTime? timestamp = null) =>
+            AppendEvent(new RescheduledMatchStateEventPayload(), timestamp ?? DateTime.UtcNow, skipTransitionValidation: false);
 
         public IScore? GetCurrentScore(IContestant contestant) =>
             Statistics.TryGetValue(contestant, out var score) ? score : null;
@@ -73,6 +118,21 @@ namespace SportsLibrary.Core
             if (ranked.Count >= 2 && ranked[0].Value.GetValue() == ranked[1].Value.GetValue())
                 return PenaltyWinner;
             return ranked[0].Key;
+        }
+
+        private void AppendEvent(IEventPayload payload, DateTime timestamp, bool skipTransitionValidation)
+        {
+            if (!skipTransitionValidation && payload is IMatchStateEventPayload statePayload)
+                ValidateTransition(statePayload.ResultingState);
+
+            _timeline.AddEvent(new InGameEvent(timestamp, payload));
+        }
+
+        private void ValidateTransition(MatchState targetState)
+        {
+            var currentState = State;
+            if (!AllowedTransitions.TryGetValue(currentState, out var allowed) || !allowed.Contains(targetState))
+                throw new InvalidOperationException($"Invalid match state transition from {currentState} to {targetState}.");
         }
     }
 }

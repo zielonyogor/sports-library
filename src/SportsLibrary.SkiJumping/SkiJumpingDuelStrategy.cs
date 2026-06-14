@@ -22,11 +22,11 @@ namespace SportsLibrary.SkiJumping
         /// </summary>
         /// <param name="contestants">The list of contestants to be paired into duels.</param>
         /// <returns>A list of matches created from the contestants.</returns>
-        public IReadOnlyList<IMatch> CreateMatches(IReadOnlyList<IContestant> contestants)
+        public IReadOnlyList<Match> CreateMatches(IReadOnlyList<IContestant> contestants)
         {
             _finalCreated = false;
             var shuffled = contestants.OrderBy(_ => _random.Next()).ToList();
-            var matches = new List<IMatch>();
+            var matches = new List<Match>();
             for (int i = 0; i + 1 < shuffled.Count; i += 2)
                 matches.Add(new Match($"Duel {i / 2 + 1}", new[] { shuffled[i], shuffled[i + 1] }));
             return matches;
@@ -37,7 +37,7 @@ namespace SportsLibrary.SkiJumping
         /// </summary>
         /// <param name="completedMatches">The list of completed matches.</param>
         /// <returns>A list of matches for the next round, or null if the final has already been created.</returns>
-        public IReadOnlyList<IMatch>? CreateNextRound(IReadOnlyList<IMatch> completedMatches)
+        public IReadOnlyList<Match>? CreateNextRound(IReadOnlyList<Match> completedMatches)
         {
             if (_finalCreated) return null;
 
@@ -63,7 +63,7 @@ namespace SportsLibrary.SkiJumping
 
             var finalists = winners.Concat(top5Losers).ToList();
             _finalCreated = true;
-            return new List<IMatch> { new Match("Final", finalists) };
+            return new List<Match> { new Match("Final", finalists) };
         }
     }
 }

@@ -67,6 +67,6 @@ public class FootballGroupStageStrategyTests
     public void CreateNextRound_AlwaysReturnsNull()
     {
         var strategy = new FootballGroupStageStrategy();
-        Assert.That(strategy.CreateNextRound(new List<IMatch>()), Is.Null);
+        Assert.That(strategy.CreateNextRound(new List<Match>()), Is.Null);
     }
 }

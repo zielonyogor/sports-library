@@ -95,7 +95,7 @@ public class SkiJumpingQualificationStrategyTests
     {
         var strategy = new SkiJumpingQualificationStrategy();
         strategy.CreateMatches(H.NumCs(5));
-        strategy.CreateNextRound(new List<IMatch>()); // sets _finalCreated = true
+        strategy.CreateNextRound(new List<Match>()); // sets _finalCreated = true
 
         var matches = strategy.CreateMatches(H.NumCs(5)); // must reset
         var finals = strategy.CreateNextRound(matches);

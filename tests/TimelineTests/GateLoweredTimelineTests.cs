@@ -62,26 +62,26 @@ public class GateLoweredTimelineTests
         var judge = GateJudge();
         var t = new DateTime(2024, 1, 28, 10, 0, 0);
 
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(0), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(0), new SkiJumpPayload
         {
             Contestant = kamil,
             Score = new SkiJumpingScore(130f, 56f, -1f, 0f),   // 185 pts, gate 14
             Distance = 130f,
         }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(5), new GateLoweredPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(5), new GateLoweredPayload
         {
             NewGate = 12,
             GatesLowered = 2,
             CompensationPerJump = 7.2f,
             Referee = judge,
         }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(10), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(10), new SkiJumpPayload
         {
             Contestant = dawid,
             Score = new SkiJumpingScore(127f, 55.5f, 0.5f, 7.2f),  // base + compensation
             Distance = 127f,
         }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(15), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(15), new SkiJumpPayload
         {
             Contestant = stefan,
             Score = new SkiJumpingScore(128f, 55f, -2f, 7.2f),
@@ -120,11 +120,11 @@ public class GateLoweredTimelineTests
         var match = new Match("Final", new[] { kamil });
         var t = new DateTime(2024, 1, 28, 10, 0, 0);
 
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(5),
+        match.RecordEvent(new InGameEvent(t.AddMinutes(5),
             new GateLoweredPayload { NewGate = 13, GatesLowered = 1, CompensationPerJump = 3.6f }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(10),
+        match.RecordEvent(new InGameEvent(t.AddMinutes(10),
             new GateLoweredPayload { NewGate = 11, GatesLowered = 2, CompensationPerJump = 7.2f }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(15), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(15), new SkiJumpPayload
         {
             Contestant = kamil,
             Score = new SkiJumpingScore(125f, 55f, 0f, 7.2f),  // second change applies
@@ -148,11 +148,11 @@ public class GateLoweredTimelineTests
         var t = new DateTime(2024, 1, 28, 10, 0, 0);
 
         // 3 jumps, 2 gate changes
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(0), new SkiJumpPayload { Contestant = C("A") }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(3), new GateLoweredPayload { NewGate = 13, GatesLowered = 1 }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(6), new SkiJumpPayload { Contestant = C("B") }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(9), new GateLoweredPayload { NewGate = 11, GatesLowered = 2 }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(12), new SkiJumpPayload { Contestant = C("A") }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(0), new SkiJumpPayload { Contestant = C("A") }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(3), new GateLoweredPayload { NewGate = 13, GatesLowered = 1 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(6), new SkiJumpPayload { Contestant = C("B") }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(9), new GateLoweredPayload { NewGate = 11, GatesLowered = 2 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(12), new SkiJumpPayload { Contestant = C("A") }));
 
         int jumps = 0, gateChanges = 0;
         match.Timeline.RepeatTimeline(ev =>

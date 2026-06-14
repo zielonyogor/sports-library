@@ -20,8 +20,8 @@ public class SkiJumpMatchControllerTests
         var kamil = C("Kamil");
         var match = new Match("Finals", new[] { kamil });
         var t = DateTime.Now;
-        match.Timeline.AddEvent(new InGameEvent(t, new SkiJumpPayload { Contestant = kamil, Score = new SkiJumpingScore(130f, 57f, 0f, 0f) }));  // 187
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(60), new SkiJumpPayload { Contestant = kamil, Score = new SkiJumpingScore(135f, 58f, 1f, 0f) })); // 194
+        match.RecordEvent(new InGameEvent(t, new SkiJumpPayload { Contestant = kamil, Score = new SkiJumpingScore(130f, 57f, 0f, 0f) }));  // 187
+        match.RecordEvent(new InGameEvent(t.AddMinutes(60), new SkiJumpPayload { Contestant = kamil, Score = new SkiJumpingScore(135f, 58f, 1f, 0f) })); // 194
 
         Assert.That(new SkiJumpMatchController(match).GetTotalScore(kamil), Is.EqualTo(381).Within(0.01));
     }
@@ -32,8 +32,8 @@ public class SkiJumpMatchControllerTests
         var kamil = C("Kamil");
         var match = new Match("Finals", new[] { kamil });
         var t = DateTime.Now;
-        match.Timeline.AddEvent(new InGameEvent(t, new SkiJumpPayload { Contestant = kamil, Score = new SkiJumpingScore(130f, 57f, 0f, 0f) })); // 187
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(60), new SkiJumpPayload { Contestant = kamil, Score = new SkiJumpingScore(135f, 58f, 1f, 0f) })); // 194
+        match.RecordEvent(new InGameEvent(t, new SkiJumpPayload { Contestant = kamil, Score = new SkiJumpingScore(130f, 57f, 0f, 0f) })); // 187
+        match.RecordEvent(new InGameEvent(t.AddMinutes(60), new SkiJumpPayload { Contestant = kamil, Score = new SkiJumpingScore(135f, 58f, 1f, 0f) })); // 194
 
         Assert.That(new SkiJumpMatchController(match).GetBestJump(kamil), Is.EqualTo(194).Within(0.01));
     }
@@ -51,7 +51,7 @@ public class SkiJumpMatchControllerTests
     {
         var kamil = C("Kamil");
         var match = new Match("Finals", new[] { kamil });
-        match.Timeline.AddEvent(new InGameEvent(DateTime.Now,
+        match.RecordEvent(new InGameEvent(DateTime.Now,
             new SkiJumpingDisqualificationPayload { Contestant = kamil, Reason = "Suit violation" }));
 
         Assert.That(new SkiJumpMatchController(match).IsDisqualified(kamil), Is.True);
@@ -71,7 +71,7 @@ public class SkiJumpMatchControllerTests
         var kamil = C("Kamil");
         var dawid = C("Dawid");
         var match = new Match("Finals", new[] { kamil, dawid });
-        match.Timeline.AddEvent(new InGameEvent(DateTime.Now,
+        match.RecordEvent(new InGameEvent(DateTime.Now,
             new SkiJumpingDisqualificationPayload { Contestant = dawid, Reason = "Gate infringement" }));
 
         var ctrl = new SkiJumpMatchController(match);

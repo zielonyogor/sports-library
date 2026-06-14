@@ -23,7 +23,7 @@ namespace SportsLibrary.Core
         /// Adds a new in-game event to the timeline.
         /// </summary>
         /// <param name="gameEvent">The in-game event to add.</param>
-        public void AddEvent(IInGameEvent gameEvent)
+        internal void AddEvent(IInGameEvent gameEvent)
         {
             ArgumentNullException.ThrowIfNull(gameEvent);
             _events.Add(gameEvent);

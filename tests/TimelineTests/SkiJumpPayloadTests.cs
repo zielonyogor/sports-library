@@ -50,17 +50,17 @@ public class SkiJumpPayloadTests
         var match = new Match("Qualification", new[] { kamil, dawid, stefan });
         var base_ = new DateTime(2024, 1, 28, 10, 0, 0);
 
-        match.Timeline.AddEvent(new InGameEvent(base_.AddMinutes(0), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(0), new SkiJumpPayload
         {
             Contestant = kamil,
             Score = new SkiJumpingScore(130f, 56f, -1f, 0f), // 185
         }));
-        match.Timeline.AddEvent(new InGameEvent(base_.AddMinutes(5), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(5), new SkiJumpPayload
         {
             Contestant = dawid,
             Score = new SkiJumpingScore(133f, 57f, 0.5f, 0.3f), // 190.8
         }));
-        match.Timeline.AddEvent(new InGameEvent(base_.AddMinutes(10), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(10), new SkiJumpPayload
         {
             Contestant = stefan,
             Score = new SkiJumpingScore(128f, 55f, -2f, 0f), // 181
@@ -84,12 +84,12 @@ public class SkiJumpPayloadTests
         var match = new Match("Final", new[] { kamil });
         var base_ = new DateTime(2024, 1, 28, 10, 0, 0);
 
-        match.Timeline.AddEvent(new InGameEvent(base_.AddMinutes(0), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(0), new SkiJumpPayload
         {
             Contestant = kamil,
             Score = new SkiJumpingScore(120f, 54f, 0f, 0f), // 174
         }));
-        match.Timeline.AddEvent(new InGameEvent(base_.AddMinutes(60), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(60), new SkiJumpPayload
         {
             Contestant = kamil,
             Score = new SkiJumpingScore(135f, 57f, 1f, 0.5f), // 193.5

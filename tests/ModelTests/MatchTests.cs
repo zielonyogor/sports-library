@@ -40,7 +40,7 @@ public class MatchTests
     public void State_CanBeUpdated()
     {
         var m = new Match("M", new[] { C("A") });
-        m.State = MatchState.InProgress;
+        m.Start();
         Assert.That(m.State, Is.EqualTo(MatchState.InProgress));
     }
 
@@ -96,6 +96,7 @@ public class MatchTests
     public void Timeline_EmptyByDefault()
     {
         var m = new Match("M", new[] { C("A") });
-        Assert.That(m.Timeline.Events, Is.Empty);
+        Assert.That(m.Timeline.Events, Has.Count.EqualTo(1));
+        Assert.That(m.Timeline.CurrentState, Is.EqualTo(MatchState.Scheduled));
     }
 }

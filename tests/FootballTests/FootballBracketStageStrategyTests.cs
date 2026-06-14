@@ -14,14 +14,14 @@ public class FootballBracketStageStrategyTests
     private static List<IContestant> Teams(params string[] names) =>
         names.Select(T).ToList<IContestant>();
 
-    private static void Win(IMatch match, IContestant winner, int winnerGoals = 1, int loserGoals = 0)
+    private static void Win(Match match, IContestant winner, int winnerGoals = 1, int loserGoals = 0)
     {
         var loser = match.Contestants.First(c => c != winner);
         match.SetScore(winner, new FootballMatchScore(winnerGoals, MatchOutcome.Win));
         match.SetScore(loser, new FootballMatchScore(loserGoals, MatchOutcome.Lose));
     }
 
-    private static void Draw(IMatch match, IContestant penaltyWinner)
+    private static void Draw(Match match, IContestant penaltyWinner)
     {
         foreach (var c in match.Contestants)
             match.SetScore(c, new FootballMatchScore(1, MatchOutcome.Draw));
@@ -52,7 +52,7 @@ public class FootballBracketStageStrategyTests
         var strategy = new FootballBracketStageStrategy();
         var matches = strategy.CreateMatches(Teams("A", "B", "C", "D"));
 
-        Assert.That(matches, Has.All.Matches<IMatch>(m => m.Name.StartsWith("Round 1")));
+        Assert.That(matches, Has.All.Matches<Match>(m => m.Name.StartsWith("Round 1")));
     }
 
     [Test]

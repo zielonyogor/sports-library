@@ -18,9 +18,9 @@ public class FootballMatchControllerTests
         var red = T("Red"); var blue = T("Blue");
         var match = new Match("Test", new[] { red, blue });
         var t = DateTime.Now;
-        match.Timeline.AddEvent(new InGameEvent(t, new FootballGoalPayload { Contestant = red, Minute = 10 }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(20), new FootballGoalPayload { Contestant = blue, Minute = 30 }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(40), new FootballGoalPayload { Contestant = red, Minute = 50 }));
+        match.RecordEvent(new InGameEvent(t, new FootballGoalPayload { Contestant = red, Minute = 10 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(20), new FootballGoalPayload { Contestant = blue, Minute = 30 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(40), new FootballGoalPayload { Contestant = red, Minute = 50 }));
 
         var ctrl = new FootballMatchController(match);
 
@@ -43,8 +43,8 @@ public class FootballMatchControllerTests
         var match = new Match("Test", new[] { player });
         var t = DateTime.Now;
         var referee = R("Referee");
-        match.Timeline.AddEvent(new InGameEvent(t, new FootballCardPayload { Contestant = player, CardType = CardType.Yellow, Minute = 30, Referee = referee }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(30), new FootballCardPayload { Contestant = player, CardType = CardType.Yellow, Minute = 60, Referee = referee }));
+        match.RecordEvent(new InGameEvent(t, new FootballCardPayload { Contestant = player, CardType = CardType.Yellow, Minute = 30, Referee = referee }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(30), new FootballCardPayload { Contestant = player, CardType = CardType.Yellow, Minute = 60, Referee = referee }));
 
         Assert.That(new FootballMatchController(match).IsPlayerSentOff(player), Is.True);
     }
@@ -55,7 +55,7 @@ public class FootballMatchControllerTests
         var player = T("Blue");
         var match = new Match("Test", new[] { player });
         var referee = R("Referee");
-        match.Timeline.AddEvent(new InGameEvent(DateTime.Now,
+        match.RecordEvent(new InGameEvent(DateTime.Now,
             new FootballCardPayload { Contestant = player, CardType = CardType.Red, Minute = 50, Referee = referee }));
 
         Assert.That(new FootballMatchController(match).IsPlayerSentOff(player), Is.True);
@@ -67,7 +67,7 @@ public class FootballMatchControllerTests
         var player = T("Blue");
         var match = new Match("Test", new[] { player });
         var referee = R("Referee");
-        match.Timeline.AddEvent(new InGameEvent(DateTime.Now,
+        match.RecordEvent(new InGameEvent(DateTime.Now,
             new FootballCardPayload { Contestant = player, CardType = CardType.Yellow, Minute = 30, Referee = referee }));
 
         Assert.That(new FootballMatchController(match).IsPlayerSentOff(player), Is.False);
@@ -80,7 +80,7 @@ public class FootballMatchControllerTests
         var match = new Match("Test", new[] { red });
         var playerIn = T("Sub");
         var playerOff = T("Starter");
-        match.Timeline.AddEvent(new InGameEvent(DateTime.Now,
+        match.RecordEvent(new InGameEvent(DateTime.Now,
             new FootballSubstitutionPayload { PlayerIn = playerIn, PlayerOff = playerOff, Minute = 65 }));
 
         var subs = new FootballMatchController(match).GetSubstitutions();

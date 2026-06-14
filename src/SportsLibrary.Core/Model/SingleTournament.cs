@@ -7,14 +7,14 @@ namespace SportsLibrary.Core
     public sealed class SingleTournament : ITournament
     {
         private readonly List<IContestant> _contestants;
-        private readonly List<IMatch> _matches = new();
+        private readonly List<Match> _matches = new();
         private readonly Dictionary<IContestant, IScore> _results = new();
         private readonly IRankingStrategy? _rankingStrategy;
 
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; }
         public IReadOnlyList<IContestant> Contestants => _contestants;
-        public IReadOnlyList<IMatch> Matches => _matches;
+        public IReadOnlyList<Match> Matches => _matches;
         public IMatchesStrategy MatchesStrategy { get; }
         public IReadOnlyDictionary<IContestant, IScore> TournamentResults => _results;
 
@@ -54,10 +54,10 @@ namespace SportsLibrary.Core
             _matches.AddRange(MatchesStrategy.CreateMatches(_contestants));
         }
 
-        public IReadOnlyList<IMatch> AdvanceRound()
+        public IReadOnlyList<Match> AdvanceRound()
         {
             var next = MatchesStrategy.CreateNextRound(_matches);
-            if (next is null) return Array.Empty<IMatch>();
+            if (next is null) return Array.Empty<Match>();
             _matches.AddRange(next);
             return next;
         }

@@ -10,6 +10,6 @@ namespace SportsLibrary.Core
         /// </summary>
         /// <param name="match">The match for which to determine the winner.</param>
         /// <returns>The winning contestant, or null if there is no winner.</returns>
-        IContestant? DetermineWinner(IMatch match);
+        IContestant? DetermineWinner(Match match);
     }
 }

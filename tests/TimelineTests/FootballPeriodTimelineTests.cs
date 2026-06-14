@@ -17,10 +17,10 @@ public class FootballPeriodTimelineTests
         var match = new Match("Final", new[] { C("Red"), C("Blue") });
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
 
-        match.Timeline.AddEvent(new InGameEvent(t, new FootballPeriodPayload { Period = MatchPeriod.FirstHalf }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(45), new FootballPeriodPayload { Period = MatchPeriod.HalfTime }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(60), new FootballPeriodPayload { Period = MatchPeriod.SecondHalf }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(105), new FootballPeriodPayload { Period = MatchPeriod.FullTime }));
+        match.RecordEvent(new InGameEvent(t, new FootballPeriodPayload { Period = MatchPeriod.FirstHalf }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(45), new FootballPeriodPayload { Period = MatchPeriod.HalfTime }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(60), new FootballPeriodPayload { Period = MatchPeriod.SecondHalf }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(105), new FootballPeriodPayload { Period = MatchPeriod.FullTime }));
 
         var periods = new List<MatchPeriod>();
         match.Timeline.RepeatTimeline(ev =>
@@ -45,14 +45,14 @@ public class FootballPeriodTimelineTests
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
 
         // FirstHalf: Red scores at 22'
-        match.Timeline.AddEvent(new InGameEvent(t, new FootballPeriodPayload { Period = MatchPeriod.FirstHalf }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(22), new FootballGoalPayload { Contestant = red, Minute = 22 }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(45), new FootballPeriodPayload { Period = MatchPeriod.HalfTime }));
+        match.RecordEvent(new InGameEvent(t, new FootballPeriodPayload { Period = MatchPeriod.FirstHalf }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(22), new FootballGoalPayload { Contestant = red, Minute = 22 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(45), new FootballPeriodPayload { Period = MatchPeriod.HalfTime }));
         // SecondHalf: Blue scores at 67', Red scores at 88'
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(60), new FootballPeriodPayload { Period = MatchPeriod.SecondHalf }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(67), new FootballGoalPayload { Contestant = blue, Minute = 67 }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(88), new FootballGoalPayload { Contestant = red, Minute = 88 }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(105), new FootballPeriodPayload { Period = MatchPeriod.FullTime }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(60), new FootballPeriodPayload { Period = MatchPeriod.SecondHalf }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(67), new FootballGoalPayload { Contestant = blue, Minute = 67 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(88), new FootballGoalPayload { Contestant = red, Minute = 88 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(105), new FootballPeriodPayload { Period = MatchPeriod.FullTime }));
 
         var currentPeriod = MatchPeriod.FirstHalf;
         var goalsByPeriod = new Dictionary<MatchPeriod, int>();
@@ -82,13 +82,13 @@ public class FootballPeriodTimelineTests
         var match = new Match("Semifinal", new[] { red, blue });
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
 
-        match.Timeline.AddEvent(new InGameEvent(t, new FootballPeriodPayload { Period = MatchPeriod.FirstHalf }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(45), new FootballPeriodPayload { Period = MatchPeriod.HalfTime }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(60), new FootballPeriodPayload { Period = MatchPeriod.SecondHalf }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(105), new FootballPeriodPayload { Period = MatchPeriod.FullTime }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(120), new FootballPeriodPayload { Period = MatchPeriod.ExtraTimeFirst }));
+        match.RecordEvent(new InGameEvent(t, new FootballPeriodPayload { Period = MatchPeriod.FirstHalf }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(45), new FootballPeriodPayload { Period = MatchPeriod.HalfTime }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(60), new FootballPeriodPayload { Period = MatchPeriod.SecondHalf }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(105), new FootballPeriodPayload { Period = MatchPeriod.FullTime }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(120), new FootballPeriodPayload { Period = MatchPeriod.ExtraTimeFirst }));
         // Golden goal in extra time at 95'
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(125), new FootballGoalPayload { Contestant = red, Minute = 95 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(125), new FootballGoalPayload { Contestant = red, Minute = 95 }));
 
         var currentPeriod = MatchPeriod.FirstHalf;
         IContestant? extraTimeScorer = null;

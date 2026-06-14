@@ -85,28 +85,28 @@ public class FootballTimelineTests
         var kickOff = new DateTime(2024, 7, 15, 15, 0, 0);
 
         // Build timeline: goal at 22', yellow card at 45', goal at 67', red card at 88'
-        match.Timeline.AddEvent(new InGameEvent(kickOff.AddMinutes(22), new FootballGoalPayload
+        match.RecordEvent(new InGameEvent(kickOff.AddMinutes(22), new FootballGoalPayload
         {
             Contestant = red,
             Minute = 22,
             Referee = referee,
             Score = new FootballMatchScore(1, MatchOutcome.Win),
         }));
-        match.Timeline.AddEvent(new InGameEvent(kickOff.AddMinutes(88), new FootballCardPayload
+        match.RecordEvent(new InGameEvent(kickOff.AddMinutes(88), new FootballCardPayload
         {
             Contestant = red,
             CardType = CardType.Red,
             Minute = 88,
             Referee = referee,
         }));
-        match.Timeline.AddEvent(new InGameEvent(kickOff.AddMinutes(45), new FootballCardPayload
+        match.RecordEvent(new InGameEvent(kickOff.AddMinutes(45), new FootballCardPayload
         {
             Contestant = blue,
             CardType = CardType.Yellow,
             Minute = 45,
             Referee = referee,
         }));
-        match.Timeline.AddEvent(new InGameEvent(kickOff.AddMinutes(67), new FootballGoalPayload
+        match.RecordEvent(new InGameEvent(kickOff.AddMinutes(67), new FootballGoalPayload
         {
             Contestant = blue,
             Minute = 67,
@@ -146,9 +146,9 @@ public class FootballTimelineTests
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
 
         // Red scores twice; Blue scores once
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(10), new FootballGoalPayload { Contestant = red }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(55), new FootballGoalPayload { Contestant = blue }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(80), new FootballGoalPayload { Contestant = red }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(10), new FootballGoalPayload { Contestant = red }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(55), new FootballGoalPayload { Contestant = blue }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(80), new FootballGoalPayload { Contestant = red }));
 
         var goals = new Dictionary<IContestant, int>();
         match.Timeline.RepeatTimeline(ev =>
@@ -171,14 +171,14 @@ public class FootballTimelineTests
         var match = new Match("Semifinal", new[] { player });
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
 
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(30), new FootballCardPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(30), new FootballCardPayload
         {
             Contestant = player,
             CardType = CardType.Yellow,
             Minute = 30,
             Referee = R("Referee"),
         }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(60), new FootballCardPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(60), new FootballCardPayload
         {
             Contestant = player,
             CardType = CardType.Yellow,
@@ -242,13 +242,13 @@ public class FootballTimelineTests
         var match = new Match("Group B", new[] { red, blue });
         var t = new DateTime(2024, 7, 15, 15, 0, 0);
 
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(22),
+        match.RecordEvent(new InGameEvent(t.AddMinutes(22),
             new FootballGoalPayload { Contestant = red, Minute = 22 }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(35),
+        match.RecordEvent(new InGameEvent(t.AddMinutes(35),
             new FootballerInjuredPayload { Contestant = blue, Minute = 35, Description = "Ankle" }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(45),
+        match.RecordEvent(new InGameEvent(t.AddMinutes(45),
             new FootballCardPayload { Contestant = red, CardType = CardType.Yellow, Minute = 45, Referee = R("Referee") }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(78),
+        match.RecordEvent(new InGameEvent(t.AddMinutes(78),
             new FootballerInjuredPayload { Contestant = red, Minute = 78 }));
 
         int goals = 0, injuries = 0, cards = 0;
