@@ -1,6 +1,9 @@
 namespace SportsLibrary.Core
 {
-    public sealed class MultiTournament : ITournament, IStageAdvancingTournament
+    /// <summary>
+    /// Represents a composite tournament made of multiple child tournaments.
+    /// </summary>
+    public sealed class MultiTournament : ITournament
     {
         private readonly List<IContestant> _contestants;
         private readonly List<ITournament> _subTournaments = new();
@@ -23,15 +26,24 @@ namespace SportsLibrary.Core
             ArgumentNullException.ThrowIfNull(contestants);
             Name = name;
             TournamentStrategy = tournamentStrategy;
-            _contestants = new List<IContestant>(contestants);
+            _contestants = contestants.ToList();
         }
 
+        /// <summary>
+        /// Adds a contestant to the multi-tournament pool.
+        /// </summary>
+        /// <param name="contestant">Contestant to add.</param>
         public void AddContestant(IContestant contestant)
         {
             ArgumentNullException.ThrowIfNull(contestant);
             _contestants.Add(contestant);
         }
 
+        /// <summary>
+        /// Stores or updates a direct result entry for this multi-tournament.
+        /// </summary>
+        /// <param name="contestant">Contestant whose score should be recorded.</param>
+        /// <param name="score">Score value to assign.</param>
         public void SetResult(IContestant contestant, IScore score)
         {
             ArgumentNullException.ThrowIfNull(contestant);
@@ -39,14 +51,21 @@ namespace SportsLibrary.Core
             _results[contestant] = score;
         }
 
+        /// <summary>
+        /// Creates and registers initial child tournaments via the configured tournament strategy.
+        /// </summary>
         public void Start()
         {
             var initial = TournamentStrategy.CreateSubTournaments(_contestants);
             _subTournaments.AddRange(initial);
-            foreach (var t in _subTournaments)
-                t.Start();
+            // foreach (var t in _subTournaments)
+            //     t.Start();
         }
 
+        /// <summary>
+        /// Calls <see cref="ITournamentStrategy.CreateNextStage"/> to create the next competition stage 
+        /// and starts any created child tournaments.
+        /// </summary>
         public void AdvanceToNextStage()
         {
             var next = TournamentStrategy.CreateNextStage(_subTournaments);
@@ -56,6 +75,10 @@ namespace SportsLibrary.Core
                 t.Start();
         }
 
+        /// <summary>
+        /// Advances the multi-tournament by one stage.
+        /// </summary>
+        /// <returns><c>true</c> when at least one new child tournament is added; otherwise <c>false</c>.</returns>
         public bool Advance()
         {
             var beforeCount = _subTournaments.Count;
@@ -63,6 +86,9 @@ namespace SportsLibrary.Core
             return _subTournaments.Count > beforeCount;
         }
 
+        /// <summary>
+        /// Finalizes results through strategy.
+        /// </summary>
         public void End()
         {
             _results.Clear();

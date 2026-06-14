@@ -90,10 +90,10 @@ public class MultiTournamentTests
     [Test]
     public void Advance_CanBeDrivenThroughSharedInterface()
     {
-        IStageAdvancingTournament mt = new MultiTournament("World Cup", new FootballWorldCupStrategy(), Teams(32));
-        ((ITournament)mt).Start();
+        var mt = new MultiTournament("World Cup", new FootballWorldCupStrategy(), Teams(32));
+        mt.Start();
 
-        foreach (var sub in ((MultiTournament)mt).SubTournaments)
+        foreach (var sub in mt.SubTournaments)
             for (int j = 0; j < sub.Contestants.Count; j++)
                 sub.SetResult(sub.Contestants[j],
                     new FootballLeaderboardScore(wins: sub.Contestants.Count - j, draws: 0, losses: 0));
