@@ -18,7 +18,7 @@ namespace SportsLibrary.Core
         /// <summary>
         /// The match is currently paused.
         /// </summary>
-        Pause,
+        Paused,
 
         /// <summary>
         /// The match has finished.

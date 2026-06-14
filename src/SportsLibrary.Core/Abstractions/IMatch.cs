@@ -4,8 +4,7 @@ namespace SportsLibrary.Core
     {
         public Guid Id { get; }
         public string Name { get; set; }
-        public DateTime Date { get; set; }
-        public MatchState State { get; set; }
+        public MatchState State { get; }
         public IReadOnlyList<IContestant> Contestants { get; }
         public IReadOnlyDictionary<IContestant, IScore> Statistics { get; }
         public Timeline Timeline { get; }

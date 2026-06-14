@@ -13,6 +13,12 @@ namespace SportsLibrary.Core
         /// </summary>
         public IReadOnlyList<IInGameEvent> Events => _events;
 
+        public MatchState CurrentState =>
+            _events.OrderByDescending(e => e.Timestamp)
+                .Select(e => e.GetEvent())
+                .OfType<IMatchStateEventPayload>()
+                .FirstOrDefault()?.ResultingState ?? throw new InvalidOperationException("Timeline does not contain any match state events.");
+
         /// <summary>
         /// Adds a new in-game event to the timeline.
         /// </summary>

@@ -24,7 +24,7 @@ A single tournament is a tournament that contains multiple matches, while a mult
 
 ### Timeline
 
-Timeline is a list of events that happened during a match. Timeline can be used to track the progress of the match and to determine the winner of the match.
+Another core concept of this library. Timeline is a list of events that happened during a match. It is a base for informations about the match. Timeline can be used to track the progress of the match, determine the winner of the match or state of the match. 
 
 #### Event payload
 
