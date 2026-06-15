@@ -26,7 +26,11 @@ namespace SportsLibrary.SkiJumping
         public IReadOnlyList<ITournament> CreateSubTournaments(IReadOnlyList<IContestant> contestants)
         {
             return HillNames
-                .Select(name => (ITournament)new SingleTournament(name, new SkiJumpingDuelStrategy(_random), contestants))
+                .Select(name => (ITournament)new SingleTournament(
+                    name,
+                    new SkiJumpingDuelStrategy(_random),
+                    contestants,
+                    new DescendingScoreRankingStrategy()))
                 .ToList();
         }
 

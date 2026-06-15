@@ -11,11 +11,23 @@ public class MatchWinnerTests
 {
     private static IContestant T(string name) => new TeamContestant(name);
 
+    private sealed class FixedWinnerStrategy(IContestant winner) : IMatchResultStrategy
+    {
+        public IContestant? DetermineWinner(Match match) => winner;
+    }
+
+    private static Match StartedMatch(params IContestant[] contestants)
+    {
+        var match = new Match("Test", contestants);
+        match.Start();
+        return match;
+    }
+
     [Test]
     public void GetWinner_ReturnsHighestScoringContestant()
     {
         var red = T("Red"); var blue = T("Blue");
-        var match = new Match("Test", new[] { red, blue });
+        var match = StartedMatch(red, blue);
         match.SetScore(red, new FootballMatchScore(goalsScored: 3));
         match.SetScore(blue, new FootballMatchScore(goalsScored: 1));
 
@@ -26,7 +38,7 @@ public class MatchWinnerTests
     public void GetWinner_TiedScore_ReturnsPenaltyWinner()
     {
         var red = T("Red"); var blue = T("Blue");
-        var match = new Match("Test", new[] { red, blue });
+        var match = StartedMatch(red, blue);
         match.SetScore(red, new FootballMatchScore(goalsScored: 2));
         match.SetScore(blue, new FootballMatchScore(goalsScored: 2));
         match.AssignPenaltyWinner(blue);
@@ -38,11 +50,21 @@ public class MatchWinnerTests
     public void GetWinner_TiedWithNoPenaltyWinner_ReturnsNull()
     {
         var red = T("Red"); var blue = T("Blue");
-        var match = new Match("Test", new[] { red, blue });
+        var match = StartedMatch(red, blue);
         match.SetScore(red, new FootballMatchScore(goalsScored: 1));
         match.SetScore(blue, new FootballMatchScore(goalsScored: 1));
 
         Assert.That(match.GetWinner(), Is.Null);
+    }
+
+    [Test]
+    public void GetWinner_UsesInjectedResultStrategy()
+    {
+        var red = T("Red");
+        var blue = T("Blue");
+        var match = new Match("Test", new[] { red, blue }, new FixedWinnerStrategy(blue));
+
+        Assert.That(match.GetWinner(), Is.SameAs(blue));
     }
 
     [Test]
@@ -56,7 +78,7 @@ public class MatchWinnerTests
     public void GetCurrentScore_ReturnsScoreForKnownContestant()
     {
         var team = T("Red");
-        var match = new Match("Test", new[] { team });
+        var match = StartedMatch(team);
         var score = new FootballMatchScore(goalsScored: 2);
         match.SetScore(team, score);
 

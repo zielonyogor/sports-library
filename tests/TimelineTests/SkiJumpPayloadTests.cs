@@ -47,31 +47,32 @@ public class SkiJumpPayloadTests
         var dawid = C("Dawid");
         var stefan = C("Stefan");
 
-        var match = new Match("Qualification", new[] { kamil, dawid, stefan });
         var base_ = new DateTime(2024, 1, 28, 10, 0, 0);
+        var match = new Match("Qualification", new[] { kamil, dawid, stefan }, base_.AddMinutes(-1));
+        match.Start(base_);
 
-        match.Timeline.AddEvent(new InGameEvent(base_.AddMinutes(0), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(0), new SkiJumpPayload
         {
             Contestant = kamil,
             Score = new SkiJumpingScore(130f, 56f, -1f, 0f), // 185
         }));
-        match.Timeline.AddEvent(new InGameEvent(base_.AddMinutes(5), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(5), new SkiJumpPayload
         {
             Contestant = dawid,
             Score = new SkiJumpingScore(133f, 57f, 0.5f, 0.3f), // 190.8
         }));
-        match.Timeline.AddEvent(new InGameEvent(base_.AddMinutes(10), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(10), new SkiJumpPayload
         {
             Contestant = stefan,
             Score = new SkiJumpingScore(128f, 55f, -2f, 0f), // 181
         }));
 
         var results = new Dictionary<IContestant, double>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             if (ev.GetEvent() is SkiJumpPayload jump && jump.Contestant != null)
                 results[jump.Contestant] = jump.Score?.GetValue() ?? 0;
-        });
+        }
 
         var winner = results.OrderByDescending(kv => kv.Value).First().Key;
         Assert.That(winner.Name, Is.EqualTo("Dawid"));
@@ -81,29 +82,30 @@ public class SkiJumpPayloadTests
     public void Timeline_SecondRoundJump_OverwritesBestScore()
     {
         var kamil = C("Kamil");
-        var match = new Match("Final", new[] { kamil });
         var base_ = new DateTime(2024, 1, 28, 10, 0, 0);
+        var match = new Match("Final", new[] { kamil }, base_.AddMinutes(-1));
+        match.Start(base_);
 
-        match.Timeline.AddEvent(new InGameEvent(base_.AddMinutes(0), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(0), new SkiJumpPayload
         {
             Contestant = kamil,
             Score = new SkiJumpingScore(120f, 54f, 0f, 0f), // 174
         }));
-        match.Timeline.AddEvent(new InGameEvent(base_.AddMinutes(60), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(60), new SkiJumpPayload
         {
             Contestant = kamil,
             Score = new SkiJumpingScore(135f, 57f, 1f, 0.5f), // 193.5
         }));
 
         var totals = new Dictionary<IContestant, double>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             if (ev.GetEvent() is SkiJumpPayload jump && jump.Contestant != null)
             {
                 totals.TryGetValue(jump.Contestant, out var current);
                 totals[jump.Contestant] = current + (jump.Score?.GetValue() ?? 0);
             }
-        });
+        }
 
         // 174 + 193.5 = 367.5
         Assert.That(totals[kamil], Is.EqualTo(367.5).Within(0.01));

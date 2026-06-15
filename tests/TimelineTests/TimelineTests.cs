@@ -9,6 +9,16 @@ namespace TimelineTests;
 [TestFixture]
 public class TimelineTests
 {
+    private sealed class RecordingListener : ITimelineListener
+    {
+        public readonly List<IInGameEvent> Events = new();
+
+        public void OnEventRecorded(IInGameEvent gameEvent)
+        {
+            Events.Add(gameEvent);
+        }
+    }
+
     private static IContestant C(string name) =>
         new SingleContestant(name, new Person(name, ""));
 
@@ -17,81 +27,148 @@ public class TimelineTests
     private static MatchSupervisor Referee() =>
         new MatchSupervisor(new Person("Referee", "Smith"));
 
+    private static Match M() => new Match("Test", new[] { C("A"), C("B") });
+
     // ── add & read ────────────────────────────────────────────────────────────
 
     [Test]
     public void AddEvent_EventAppearsInEvents()
     {
-        var timeline = new Timeline();
-        var ev = new InGameEvent(DateTime.Now, new SkiJumpPayload());
+        var baseTime = new DateTime(2024, 1, 1, 10, 0, 0);
+        var match = new Match("Test", new[] { C("A"), C("B") }, baseTime.AddMinutes(-2));
+        match.Start(baseTime.AddMinutes(-1));
+        var timeline = match.Timeline;
+        var ev = new InGameEvent(baseTime, new SkiJumpPayload());
 
-        timeline.AddEvent(ev);
+        match.RecordEvent(ev);
 
-        Assert.That(timeline.Events, Contains.Item(ev));
+        Assert.That(timeline.Events.Any(e => e.Timestamp == ev.Timestamp && e.GetEvent() == ev.GetEvent()), Is.True);
     }
 
     [Test]
     public void AddEvent_MultipleEvents_AllPreserved()
     {
-        var timeline = new Timeline();
+        var baseTime = new DateTime(2024, 1, 1, 10, 0, 0);
+        var match = new Match("Test", new[] { C("A"), C("B") }, baseTime.AddMinutes(-2));
+        match.Start(baseTime.AddMinutes(-1));
+        var timeline = match.Timeline;
         var events = Enumerable.Range(0, 5)
-            .Select(_ => new InGameEvent(DateTime.Now, new SkiJumpPayload()))
+            .Select(i => new InGameEvent(baseTime.AddMinutes(i), new SkiJumpPayload()))
             .ToList<IInGameEvent>();
 
-        foreach (var ev in events) timeline.AddEvent(ev);
+        foreach (var ev in events) match.RecordEvent(ev);
 
-        Assert.That(timeline.Events.Count, Is.EqualTo(5));
-        Assert.That(timeline.Events, Is.EquivalentTo(events));
+        Assert.That(timeline.Events.Count, Is.EqualTo(7));
+        Assert.That(timeline.Events.Skip(2).Select(e => e.GetEvent()), Is.EquivalentTo(events.Select(e => e.GetEvent())));
     }
 
     [Test]
     public void Events_IsReadOnly_CannotBeModifiedExternally()
     {
-        var timeline = new Timeline();
+        var timeline = M().Timeline;
         // IReadOnlyList — no Add/Remove exposed
         Assert.That(timeline.Events, Is.InstanceOf<IReadOnlyList<IInGameEvent>>());
     }
 
-    // ── replay order ──────────────────────────────────────────────────────────
+    // ── observer behavior ─────────────────────────────────────────────────────
 
     [Test]
-    public void RepeatTimeline_ReplayedInChronologicalOrder()
+    public void AddEvent_OutOfOrderTimestamp_Throws()
     {
-        var timeline = new Timeline();
+        var match = M();
         var base_ = new DateTime(2024, 1, 1, 10, 0, 0);
 
-        // Add in reverse order
-        timeline.AddEvent(new InGameEvent(base_.AddMinutes(30), new SkiJumpPayload()));
-        timeline.AddEvent(new InGameEvent(base_.AddMinutes(10), new SkiJumpPayload()));
-        timeline.AddEvent(new InGameEvent(base_.AddMinutes(50), new SkiJumpPayload()));
+        var orderedMatch = new Match("Test", new[] { C("A"), C("B") }, base_);
+        orderedMatch.Start(base_.AddMinutes(1));
+        orderedMatch.RecordEvent(new InGameEvent(base_.AddMinutes(30), new SkiJumpPayload()));
 
-        var replayed = new List<DateTime>();
-        timeline.RepeatTimeline(ev => replayed.Add(ev.Timestamp));
-
-        Assert.That(replayed, Is.Ordered.Ascending);
+        Assert.Throws<InvalidOperationException>(() =>
+            orderedMatch.RecordEvent(new InGameEvent(base_.AddMinutes(10), new SkiJumpPayload())));
     }
 
     [Test]
-    public void RepeatTimeline_EmptyTimeline_CallbackNeverInvoked()
+    public void Subscribe_ListenerCalledInRecordOrder()
     {
-        var timeline = new Timeline();
-        int calls = 0;
+        var base_ = new DateTime(2024, 1, 1, 10, 0, 0);
+        var match = new Match("Test", new[] { C("A"), C("B") }, base_);
+        match.Start(base_.AddMinutes(1));
 
-        timeline.RepeatTimeline(_ => calls++);
+        var listener = new RecordingListener();
+        match.Timeline.Subscribe(listener);
 
-        Assert.That(calls, Is.EqualTo(0));
+        var ev1 = new InGameEvent(base_.AddMinutes(10), new SkiJumpPayload());
+        var ev2 = new InGameEvent(base_.AddMinutes(20), new SkiJumpPayload());
+        var ev3 = new InGameEvent(base_.AddMinutes(30), new SkiJumpPayload());
+
+        match.RecordEvent(ev1);
+        match.RecordEvent(ev2);
+        match.RecordEvent(ev3);
+
+        Assert.That(listener.Events.Select(e => e.Timestamp), Is.EqualTo(new[] { ev1.Timestamp, ev2.Timestamp, ev3.Timestamp }));
     }
 
     [Test]
-    public void RepeatTimeline_PayloadsAccessibleDuringReplay()
+    public void Subscribe_DuplicateListener_NotRegisteredTwice()
     {
-        var timeline = new Timeline();
+        var base_ = new DateTime(2024, 1, 1, 10, 0, 0);
+        var match = new Match("Test", new[] { C("A"), C("B") }, base_);
+        match.Start(base_.AddMinutes(1));
+        var listener = new RecordingListener();
+
+        match.Timeline.Subscribe(listener);
+        match.Timeline.Subscribe(listener);
+
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(2), new SkiJumpPayload()));
+
+        Assert.That(listener.Events, Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public void Unsubscribe_RemovesListener()
+    {
+        var base_ = new DateTime(2024, 1, 1, 10, 0, 0);
+        var match = new Match("Test", new[] { C("A"), C("B") }, base_);
+        match.Start(base_.AddMinutes(1));
+        var listener = new RecordingListener();
+
+        match.Timeline.Subscribe(listener);
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(2), new SkiJumpPayload()));
+        var removed = match.Timeline.Unsubscribe(listener);
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(3), new SkiJumpPayload()));
+
+        Assert.That(removed, Is.True);
+        Assert.That(listener.Events, Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public void Listener_NotCalledWhenValidationFails()
+    {
+        var contestant = C("A");
+        var match = new Match("Test", new[] { contestant, C("B") });
+        var listener = new RecordingListener();
+        match.Timeline.Subscribe(listener);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            match.RecordEvent(new FootballGoalPayload { Contestant = contestant, Minute = 10 }));
+
+        Assert.That(listener.Events, Is.Empty);
+    }
+
+    [Test]
+    public void Listener_PayloadAccessibleAfterEventIsRecorded()
+    {
+        var base_ = new DateTime(2024, 1, 1, 10, 0, 0);
         var contestant = C("Kamil");
-        var payload = new SkiJumpPayload { Contestant = contestant, Score = Pts(200f) };
-        timeline.AddEvent(new InGameEvent(DateTime.Now, payload));
+        var match = new Match("Test", new[] { contestant, C("B") }, base_);
+        match.Start(base_.AddMinutes(1));
 
-        IEventPayload? captured = null;
-        timeline.RepeatTimeline(ev => captured = ev.GetEvent());
+        var listener = new RecordingListener();
+        match.Timeline.Subscribe(listener);
+
+        var payload = new SkiJumpPayload { Contestant = contestant, Score = Pts(200f) };
+        match.RecordEvent(new InGameEvent(base_.AddMinutes(2), payload));
+
+        IEventPayload? captured = listener.Events.Single().GetEvent();
 
         Assert.That(captured, Is.SameAs(payload));
         var ep = (SkiJumpPayload)captured!;

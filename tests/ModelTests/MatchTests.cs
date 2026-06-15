@@ -40,7 +40,7 @@ public class MatchTests
     public void State_CanBeUpdated()
     {
         var m = new Match("M", new[] { C("A") });
-        m.State = MatchState.InProgress;
+        m.Start();
         Assert.That(m.State, Is.EqualTo(MatchState.InProgress));
     }
 
@@ -65,8 +65,18 @@ public class MatchTests
         var a = C("A");
         var m = new Match("M", new[] { a });
         var score = new FootballMatchScore(goalsScored: 2);
+        m.Start();
         m.SetScore(a, score);
         Assert.That(m.Statistics[a], Is.SameAs(score));
+    }
+
+    [Test]
+    public void SetScore_UnknownContestant_Throws()
+    {
+        var m = new Match("M", new[] { C("A") });
+        m.Start();
+
+        Assert.Throws<ArgumentException>(() => m.SetScore(C("B"), new FootballMatchScore(goalsScored: 1)));
     }
 
     [Test]
@@ -81,8 +91,31 @@ public class MatchTests
     {
         var b = C("B");
         var m = new Match("M", new[] { C("A"), b });
+        m.Start();
         m.AssignPenaltyWinner(b);
         Assert.That(m.PenaltyWinner, Is.SameAs(b));
+    }
+
+    [Test]
+    public void RecordEvent_BeforeStart_Throws()
+    {
+        var a = C("A");
+        var m = new Match("M", new[] { a });
+
+        Assert.Throws<InvalidOperationException>(() =>
+            m.RecordEvent(new FootballGoalPayload { Contestant = a, Minute = 1 }));
+    }
+
+    [Test]
+    public void RecordEvent_AfterFinish_Throws()
+    {
+        var a = C("A");
+        var m = new Match("M", new[] { a });
+        m.Start();
+        m.Finish();
+
+        Assert.Throws<InvalidOperationException>(() =>
+            m.RecordEvent(new FootballGoalPayload { Contestant = a, Minute = 90 }));
     }
 
     [Test]
@@ -96,6 +129,15 @@ public class MatchTests
     public void Timeline_EmptyByDefault()
     {
         var m = new Match("M", new[] { C("A") });
-        Assert.That(m.Timeline.Events, Is.Empty);
+        Assert.That(m.Timeline.Events, Has.Count.EqualTo(1));
+        Assert.That(m.State, Is.EqualTo(MatchState.Scheduled));
+    }
+
+    [Test]
+    public void Transition_DefaultPolicy_InvalidTransitionThrows()
+    {
+        var m = new Match("M", new[] { C("A") });
+
+        Assert.Throws<InvalidOperationException>(() => m.Finish());
     }
 }

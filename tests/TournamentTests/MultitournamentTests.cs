@@ -88,6 +88,20 @@ public class MultiTournamentTests
     }
 
     [Test]
+    public void Advance_CanBeDrivenThroughSharedInterface()
+    {
+        var mt = new MultiTournament("World Cup", new FootballWorldCupStrategy(), Teams(32));
+        mt.Start();
+
+        foreach (var sub in mt.SubTournaments)
+            for (int j = 0; j < sub.Contestants.Count; j++)
+                sub.SetResult(sub.Contestants[j],
+                    new FootballLeaderboardScore(wins: sub.Contestants.Count - j, draws: 0, losses: 0));
+
+        Assert.That(mt.Advance(), Is.True);
+    }
+
+    [Test]
     public void AdvanceToNextStage_FourHills_StrategyReturnsNull_CountUnchanged()
     {
         // FourHillsStrategy.CreateNextStage always returns null

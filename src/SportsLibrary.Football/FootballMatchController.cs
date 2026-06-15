@@ -2,25 +2,27 @@ using SportsLibrary.Core;
 
 namespace SportsLibrary.Football
 {
-    public sealed class FootballMatchController(Match match)
+    public sealed class FootballMatchController
     {
-        public int GetGoalCount(IContestant team) =>
-            match.Timeline.GetEventsByPayloadType<FootballGoalPayload>()
-                .Count(g => g.Contestant == team);
+        private readonly FootballMatchTracker _tracker;
 
-        public IReadOnlyList<FootballCardPayload> GetCards(IContestant player) =>
-            match.Timeline.GetEventsByPayloadType<FootballCardPayload>()
-                .Where(c => c.Contestant == player)
-                .ToList();
-
-        public bool IsPlayerSentOff(IContestant player)
+        public FootballMatchController(Match match)
+            : this(match, null)
         {
-            var cards = GetCards(player);
-            return cards.Any(c => c.CardType == CardType.Red) ||
-                   cards.Count(c => c.CardType == CardType.Yellow) >= 2;
         }
 
-        public IReadOnlyList<FootballSubstitutionPayload> GetSubstitutions() =>
-            match.Timeline.GetEventsByPayloadType<FootballSubstitutionPayload>();
+        public FootballMatchController(Match match, FootballMatchTracker? tracker)
+        {
+            ArgumentNullException.ThrowIfNull(match);
+            _tracker = tracker ?? new FootballMatchTracker(match);
+        }
+
+        public int GetGoalCount(IContestant team) => _tracker.GetGoalCount(team);
+
+        public IReadOnlyList<FootballCardPayload> GetCards(IContestant player) => _tracker.GetCards(player);
+
+        public bool IsPlayerSentOff(IContestant player) => _tracker.IsPlayerSentOff(player);
+
+        public IReadOnlyList<FootballSubstitutionPayload> GetSubstitutions() => _tracker.GetSubstitutions();
     }
 }

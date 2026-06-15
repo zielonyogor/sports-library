@@ -14,42 +14,45 @@ public class SingleTournamentTests
     private static List<IContestant> Teams(params string[] names) =>
         names.Select(T).ToList<IContestant>();
 
-    private static SingleTournament MakeTournament(string name, IMatchesStrategy strategy, IEnumerable<IContestant>? contestants = null) =>
-        new SingleTournament(name, strategy, contestants ?? Enumerable.Empty<IContestant>());
+    private static SingleTournament MakeTournament(string name, IMatchesStrategy strategy, IEnumerable<IContestant>? contestants = null, IRankingStrategy? rankingStrategy = null) =>
+        new SingleTournament(name, strategy, contestants ?? Enumerable.Empty<IContestant>(), rankingStrategy ?? new DescendingScoreRankingStrategy());
+
+    private static SingleTournament MakeRankedTournament(string name, IMatchesStrategy strategy, IEnumerable<IContestant>? contestants = null) =>
+        new SingleTournament(name, strategy, contestants ?? Enumerable.Empty<IContestant>(), new FootballGroupRankingStrategy());
 
     [Test]
     public void Id_UniquePerInstance()
     {
-        var t1 = new SingleTournament("T", new FootballGroupStageStrategy());
-        var t2 = new SingleTournament("T", new FootballGroupStageStrategy());
+        var t1 = MakeTournament("T", new FootballGroupStageStrategy());
+        var t2 = MakeTournament("T", new FootballGroupStageStrategy());
         Assert.That(t1.Id, Is.Not.EqualTo(t2.Id));
     }
 
     [Test]
     public void Name_SetViaConstructor()
     {
-        var t = new SingleTournament("Group A", new FootballGroupStageStrategy());
+        var t = MakeTournament("Group A", new FootballGroupStageStrategy());
         Assert.That(t.Name, Is.EqualTo("Group A"));
     }
 
     [Test]
     public void Matches_EmptyBeforeStart()
     {
-        var t = new SingleTournament("T", new FootballGroupStageStrategy());
+        var t = MakeTournament("T", new FootballGroupStageStrategy());
         Assert.That(t.Matches, Is.Empty);
     }
 
     [Test]
     public void Contestants_EmptyByDefault()
     {
-        var t = new SingleTournament("T", new FootballGroupStageStrategy());
+        var t = MakeTournament("T", new FootballGroupStageStrategy());
         Assert.That(t.Contestants, Is.Empty);
     }
 
     [Test]
     public void TournamentResults_EmptyByDefault()
     {
-        var t = new SingleTournament("T", new FootballGroupStageStrategy());
+        var t = MakeTournament("T", new FootballGroupStageStrategy());
         Assert.That(t.TournamentResults, Is.Empty);
     }
 
@@ -81,7 +84,7 @@ public class SingleTournamentTests
     }
 
     [Test]
-    public void End_DoesNotThrow()
+    public void End_WithDefaultRankingStrategy_DoesNotThrow()
     {
         var t = MakeTournament("T", new FootballGroupStageStrategy(), Teams("A", "B"));
         t.Start();
@@ -89,20 +92,40 @@ public class SingleTournamentTests
     }
 
     [Test]
-    public void TournamentResults_CanBePopulatedAndRead()
+    public void End_WithRankingStrategy_RanksResults()
     {
-        var t = new SingleTournament("T", new FootballGroupStageStrategy());
-        var team = T("Team A");
-        t.SetResult(team, new FootballLeaderboardScore(wins: 3, draws: 0, losses: 0));
-        Assert.That(t.TournamentResults[team].GetValue(), Is.EqualTo(9));
+        var teams = Teams("A", "B", "C");
+        var t = MakeRankedTournament("T", new FootballGroupStageStrategy(), teams);
+        t.Start();
+        t.SetResult(teams[0], new FootballLeaderboardScore(wins: 1, draws: 0, losses: 0, goalsScored: 1, goalsConceded: 0));
+        t.SetResult(teams[1], new FootballLeaderboardScore(wins: 2, draws: 0, losses: 0, goalsScored: 4, goalsConceded: 1));
+        t.SetResult(teams[2], new FootballLeaderboardScore(wins: 0, draws: 1, losses: 1, goalsScored: 1, goalsConceded: 3));
+
+        t.End();
+
+        Assert.That(t.TournamentResults.Keys.First(), Is.SameAs(teams[1]));
     }
 
     [Test]
-    public void AddContestant_AppendsToContestants()
+    public void Advance_CanBeDrivenThroughSharedInterface()
     {
-        var t = new SingleTournament("T", new FootballGroupStageStrategy());
+        var t = new SingleTournament(
+            "T",
+            new SkiJumpingQualificationStrategy(),
+            Enumerable.Range(1, 50).Select(i => T($"A{i}")),
+            new DescendingScoreRankingStrategy());
+
+        t.Start();
+
+        Assert.That(t.Advance(), Is.True);
+    }
+
+    [Test]
+    public void TournamentResults_CanBePopulatedAndRead()
+    {
+        var t = MakeTournament("T", new FootballGroupStageStrategy());
         var team = T("Team A");
-        t.AddContestant(team);
-        Assert.That(t.Contestants, Contains.Item(team));
+        t.SetResult(team, new FootballLeaderboardScore(wins: 3, draws: 0, losses: 0));
+        Assert.That(t.TournamentResults[team].GetValue(), Is.EqualTo(9));
     }
 }

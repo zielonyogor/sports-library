@@ -7,6 +7,7 @@ namespace SportsLibrary.Core
     public sealed class Timeline
     {
         private readonly List<IInGameEvent> _events = new();
+        private readonly HashSet<ITimelineListener> _listeners = new();
 
         /// <summary>
         /// List of in-game events. Each event is expected to have a timestamp and a payload describing the event details.
@@ -17,20 +18,37 @@ namespace SportsLibrary.Core
         /// Adds a new in-game event to the timeline.
         /// </summary>
         /// <param name="gameEvent">The in-game event to add.</param>
-        public void AddEvent(IInGameEvent gameEvent)
+        internal void AddEvent(IInGameEvent gameEvent)
         {
             ArgumentNullException.ThrowIfNull(gameEvent);
+
+            if (_events.Count > 0 && gameEvent.Timestamp < _events[^1].Timestamp)
+                throw new InvalidOperationException("Cannot append an event older than the last recorded event.");
+
             _events.Add(gameEvent);
+
+            foreach (var listener in _listeners)
+                listener.OnEventRecorded(gameEvent);
         }
 
-        /// <summary>
-        /// Repeats the timeline, invoking the specified action for each event in chronological order.
-        /// </summary>
-        /// <param name="onEvent">The action to invoke for each event.</param>
-        public void RepeatTimeline(Action<IInGameEvent> onEvent)
+        public void Subscribe(ITimelineListener listener, bool replayExisting = false)
         {
-            foreach (var ev in _events.OrderBy(e => e.Timestamp))
-                onEvent(ev);
+            ArgumentNullException.ThrowIfNull(listener);
+
+            if (!_listeners.Add(listener))
+                return;
+
+            if (!replayExisting)
+                return;
+
+            foreach (var gameEvent in _events)
+                listener.OnEventRecorded(gameEvent);
+        }
+
+        public bool Unsubscribe(ITimelineListener listener)
+        {
+            ArgumentNullException.ThrowIfNull(listener);
+            return _listeners.Remove(listener);
         }
 
         /// <summary>

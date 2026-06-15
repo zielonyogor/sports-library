@@ -58,30 +58,31 @@ public class GateLoweredTimelineTests
         var kamil = C("Kamil");
         var dawid = C("Dawid");
         var stefan = C("Stefan");
-        var match = new Match("Qualification", new[] { kamil, dawid, stefan });
         var judge = GateJudge();
         var t = new DateTime(2024, 1, 28, 10, 0, 0);
+        var match = new Match("Qualification", new[] { kamil, dawid, stefan }, t.AddMinutes(-1));
+        match.Start(t);
 
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(0), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(0), new SkiJumpPayload
         {
             Contestant = kamil,
             Score = new SkiJumpingScore(130f, 56f, -1f, 0f),   // 185 pts, gate 14
             Distance = 130f,
         }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(5), new GateLoweredPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(5), new GateLoweredPayload
         {
             NewGate = 12,
             GatesLowered = 2,
             CompensationPerJump = 7.2f,
             Referee = judge,
         }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(10), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(10), new SkiJumpPayload
         {
             Contestant = dawid,
             Score = new SkiJumpingScore(127f, 55.5f, 0.5f, 7.2f),  // base + compensation
             Distance = 127f,
         }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(15), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(15), new SkiJumpPayload
         {
             Contestant = stefan,
             Score = new SkiJumpingScore(128f, 55f, -2f, 7.2f),
@@ -91,7 +92,7 @@ public class GateLoweredTimelineTests
         // Replay: track current gate compensation and accumulate each jumper's final score
         float activeCompensation = 0f;
         var finalScores = new Dictionary<IContestant, double>();
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             switch (ev.GetEvent())
             {
@@ -102,7 +103,7 @@ public class GateLoweredTimelineTests
                     finalScores[jump.Contestant] = jump.Score?.GetValue() ?? 0;
                     break;
             }
-        });
+            }
 
         // Kamil jumped before the gate change → no gate compensation baked in
         Assert.That(finalScores[kamil], Is.EqualTo(185).Within(0.01));
@@ -117,14 +118,15 @@ public class GateLoweredTimelineTests
     public void Timeline_MultipleGateChanges_LastChangeWins()
     {
         var kamil = C("Kamil");
-        var match = new Match("Final", new[] { kamil });
         var t = new DateTime(2024, 1, 28, 10, 0, 0);
+        var match = new Match("Final", new[] { kamil }, t.AddMinutes(-1));
+        match.Start(t);
 
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(5),
+        match.RecordEvent(new InGameEvent(t.AddMinutes(5),
             new GateLoweredPayload { NewGate = 13, GatesLowered = 1, CompensationPerJump = 3.6f }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(10),
+        match.RecordEvent(new InGameEvent(t.AddMinutes(10),
             new GateLoweredPayload { NewGate = 11, GatesLowered = 2, CompensationPerJump = 7.2f }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(15), new SkiJumpPayload
+        match.RecordEvent(new InGameEvent(t.AddMinutes(15), new SkiJumpPayload
         {
             Contestant = kamil,
             Score = new SkiJumpingScore(125f, 55f, 0f, 7.2f),  // second change applies
@@ -132,11 +134,11 @@ public class GateLoweredTimelineTests
         }));
 
         float compensation = 0f;
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             if (ev.GetEvent() is GateLoweredPayload gate)
                 compensation = gate.CompensationPerJump;
-        });
+        }
 
         Assert.That(compensation, Is.EqualTo(7.2f).Within(0.001f));
     }
@@ -144,25 +146,28 @@ public class GateLoweredTimelineTests
     [Test]
     public void Timeline_EventTypeDistribution_CorrectCounts()
     {
-        var match = new Match("Competition", new[] { C("A"), C("B") });
         var t = new DateTime(2024, 1, 28, 10, 0, 0);
+        var a = C("A");
+        var b = C("B");
+        var match = new Match("Competition", new[] { a, b }, t.AddMinutes(-1));
+        match.Start(t);
 
         // 3 jumps, 2 gate changes
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(0), new SkiJumpPayload { Contestant = C("A") }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(3), new GateLoweredPayload { NewGate = 13, GatesLowered = 1 }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(6), new SkiJumpPayload { Contestant = C("B") }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(9), new GateLoweredPayload { NewGate = 11, GatesLowered = 2 }));
-        match.Timeline.AddEvent(new InGameEvent(t.AddMinutes(12), new SkiJumpPayload { Contestant = C("A") }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(0), new SkiJumpPayload { Contestant = a }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(3), new GateLoweredPayload { NewGate = 13, GatesLowered = 1 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(6), new SkiJumpPayload { Contestant = b }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(9), new GateLoweredPayload { NewGate = 11, GatesLowered = 2 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(12), new SkiJumpPayload { Contestant = a }));
 
         int jumps = 0, gateChanges = 0;
-        match.Timeline.RepeatTimeline(ev =>
+        foreach (var ev in match.Timeline.Events)
         {
             switch (ev.GetEvent())
             {
                 case SkiJumpPayload: jumps++; break;
                 case GateLoweredPayload: gateChanges++; break;
             }
-        });
+        }
 
         Assert.That(jumps, Is.EqualTo(3));
         Assert.That(gateChanges, Is.EqualTo(2));
