@@ -58,6 +58,34 @@ public class MatchWinnerTests
     }
 
     [Test]
+    public void GetWinner_SkiJumpingDisqualifiedTopScore_UsesEligibleContestant()
+    {
+        var kamil = T("Kamil");
+        var dawid = T("Dawid");
+        var match = StartedMatch(kamil, dawid);
+
+        match.SetScore(kamil, new SkiJumpingScore(140f, 58f, 0f, 0f));
+        match.SetScore(dawid, new SkiJumpingScore(130f, 56f, 0f, 0f));
+        match.RecordEvent(new SkiJumpingDisqualificationPayload { Contestant = kamil, Reason = "Suit infringement" });
+
+        Assert.That(match.GetWinner(), Is.SameAs(dawid));
+    }
+
+    [Test]
+    public void GetWinner_FootballScoringDisqualifiedTopScore_UsesEligibleContestant()
+    {
+        var red = T("Red");
+        var blue = T("Blue");
+        var match = StartedMatch(red, blue);
+
+        match.SetScore(red, new FootballMatchScore(goalsScored: 3));
+        match.SetScore(blue, new FootballMatchScore(goalsScored: 1));
+        match.RecordEvent(new DisqualificationEventPayload(red, "Administrative disqualification"));
+
+        Assert.That(match.GetWinner(), Is.SameAs(blue));
+    }
+
+    [Test]
     public void GetWinner_UsesInjectedResultStrategy()
     {
         var red = T("Red");

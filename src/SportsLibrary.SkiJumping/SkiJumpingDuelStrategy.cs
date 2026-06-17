@@ -47,7 +47,10 @@ namespace SportsLibrary.SkiJumping
 
             foreach (var match in completedMatches)
             {
+                var disqualified = DisqualificationResolver.GetDisqualifiedContestants(match);
+
                 var ranked = match.Contestants
+                    .Where(c => !disqualified.Contains(c))
                     .Select(c => (c, match.Statistics.TryGetValue(c, out var s) ? s.GetValue() : 0d))
                     .OrderByDescending(x => x.Item2)
                     .ToList();

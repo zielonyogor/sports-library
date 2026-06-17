@@ -97,6 +97,48 @@ public class MatchTests
     }
 
     [Test]
+    public void GetDisqualifiedContestants_EmptyByDefault()
+    {
+        var m = new Match("M", new[] { C("A"), C("B") });
+
+        Assert.That(m.GetDisqualifiedContestants(), Is.Empty);
+    }
+
+    [Test]
+    public void Disqualify_MarksContestantAsDisqualified()
+    {
+        var a = C("A");
+        var m = new Match("M", new[] { a, C("B") });
+        m.Start();
+
+        m.Disqualify(a, "Rule breach");
+
+        Assert.That(m.IsDisqualified(a), Is.True);
+        Assert.That(m.GetDisqualifiedContestants(), Does.Contain(a));
+    }
+
+    [Test]
+    public void Disqualify_UnknownContestant_Throws()
+    {
+        var m = new Match("M", new[] { C("A") });
+        m.Start();
+
+        Assert.Throws<ArgumentException>(() => m.Disqualify(C("X")));
+    }
+
+    [Test]
+    public void Disqualify_AfterFinish_IsAllowed()
+    {
+        var a = C("A");
+        var m = new Match("M", new[] { a, C("B") });
+        m.Start();
+        m.Finish();
+
+        Assert.DoesNotThrow(() => m.Disqualify(a, "Post-event review"));
+        Assert.That(m.IsDisqualified(a), Is.True);
+    }
+
+    [Test]
     public void RecordEvent_BeforeStart_Throws()
     {
         var a = C("A");

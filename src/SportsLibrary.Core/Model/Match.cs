@@ -11,6 +11,7 @@ namespace SportsLibrary.Core
         private readonly MatchStateTracker _stateTracker;
         private readonly MatchStatisticsTracker _statisticsTracker;
         private readonly PenaltyWinnerTracker _penaltyWinnerTracker;
+        private readonly DisqualificationTracker _disqualificationTracker;
         private readonly MatchEventValidationPolicy _eventValidationPolicy;
 
         public Guid Id { get; } = Guid.NewGuid();
@@ -37,10 +38,12 @@ namespace SportsLibrary.Core
             _stateTracker = new MatchStateTracker();
             _statisticsTracker = new MatchStatisticsTracker();
             _penaltyWinnerTracker = new PenaltyWinnerTracker();
+            _disqualificationTracker = new DisqualificationTracker();
 
             _timeline.Subscribe(_stateTracker);
             _timeline.Subscribe(_statisticsTracker);
             _timeline.Subscribe(_penaltyWinnerTracker);
+            _timeline.Subscribe(_disqualificationTracker);
 
             AppendEvent(new ScheduledMatchStateEventPayload(scheduledDate), scheduledDate);
         }
@@ -66,6 +69,15 @@ namespace SportsLibrary.Core
             if (!_contestants.Contains(winner))
                 throw new ArgumentException("Penalty winner must be one of the match contestants.", nameof(winner));
             RecordEvent(new PenaltyWinnerAssignedPayload(winner));
+        }
+
+        public void Disqualify(IContestant contestant, string? reason = null)
+        {
+            ArgumentNullException.ThrowIfNull(contestant);
+            if (!_contestants.Contains(contestant))
+                throw new ArgumentException("Disqualified contestant must be one of the match contestants.", nameof(contestant));
+
+            RecordEvent(new DisqualificationEventPayload(contestant, reason));
         }
 
         public void RecordEvent(IEventPayload payload, DateTime? timestamp = null)
@@ -103,6 +115,18 @@ namespace SportsLibrary.Core
 
         public IScore? GetCurrentScore(IContestant contestant) =>
             _statisticsTracker.GetCurrentScore(contestant);
+
+        public bool IsDisqualified(IContestant contestant)
+        {
+            ArgumentNullException.ThrowIfNull(contestant);
+            if (!_contestants.Contains(contestant))
+                throw new ArgumentException("Contestant must be one of the match contestants.", nameof(contestant));
+
+            return _disqualificationTracker.IsDisqualified(contestant);
+        }
+
+        public IReadOnlyCollection<IContestant> GetDisqualifiedContestants() =>
+            _disqualificationTracker.GetDisqualifiedContestants();
 
         public IContestant? GetWinner() => ResultStrategy.DetermineWinner(this);
 

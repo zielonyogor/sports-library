@@ -43,7 +43,7 @@ namespace SportsLibrary.SkiJumping
                     _totals[jump.Contestant] = _totals.GetValueOrDefault(jump.Contestant) + points;
                     _bestJumps[jump.Contestant] = Math.Max(_bestJumps.GetValueOrDefault(jump.Contestant), points);
                     break;
-                case SkiJumpingDisqualificationPayload { Contestant: not null } disqualification:
+                case IDisqualificationEventPayload { Contestant: not null } disqualification:
                     _disqualified.Add(disqualification.Contestant);
                     break;
             }
