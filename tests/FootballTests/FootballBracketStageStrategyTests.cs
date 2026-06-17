@@ -20,8 +20,8 @@ public class FootballBracketStageStrategyTests
             match.Start();
 
         var loser = match.Contestants.First(c => c != winner);
-        match.SetScore(winner, new FootballMatchScore(winnerGoals, MatchOutcome.Win));
-        match.SetScore(loser, new FootballMatchScore(loserGoals, MatchOutcome.Lose));
+        match.SetScore(winner, new FootballMatchScore(winnerGoals));
+        match.SetScore(loser, new FootballMatchScore(loserGoals));
     }
 
     private static void Draw(Match match, IContestant penaltyWinner)
@@ -30,7 +30,7 @@ public class FootballBracketStageStrategyTests
             match.Start();
 
         foreach (var c in match.Contestants)
-            match.SetScore(c, new FootballMatchScore(1, MatchOutcome.Draw));
+            match.SetScore(c, new FootballMatchScore(1));
         match.AssignPenaltyWinner(penaltyWinner);
     }
 
