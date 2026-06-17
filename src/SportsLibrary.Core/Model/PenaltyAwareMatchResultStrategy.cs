@@ -11,11 +11,14 @@ namespace SportsLibrary.Core
         {
             ArgumentNullException.ThrowIfNull(match);
 
+            var disqualified = DisqualificationResolver.GetDisqualifiedContestants(match);
+
             var winner = _inner.DetermineWinner(match);
-            if (winner is not null)
+            if (winner is not null && !disqualified.Contains(winner))
                 return winner;
 
             var ranked = match.Statistics
+                .Where(kv => !disqualified.Contains(kv.Key))
                 .OrderByDescending(kv => kv.Value.GetValue())
                 .ToList();
 
@@ -23,7 +26,9 @@ namespace SportsLibrary.Core
                 return ranked.FirstOrDefault().Key;
 
             return ranked[0].Value.GetValue() == ranked[1].Value.GetValue()
-                ? match.PenaltyWinner
+                ? (match.PenaltyWinner is not null && !disqualified.Contains(match.PenaltyWinner)
+                    ? match.PenaltyWinner
+                    : null)
                 : ranked[0].Key;
         }
     }

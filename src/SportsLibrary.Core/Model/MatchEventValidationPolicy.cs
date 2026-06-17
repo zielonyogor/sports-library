@@ -102,6 +102,14 @@ namespace SportsLibrary.Core
                 throw new InvalidOperationException($"Cannot record a penalty resolution while the match is {currentState}.");
             }
 
+            if (payload is IDisqualificationEventPayload)
+            {
+                if (currentState is MatchState.InProgress or MatchState.Paused or MatchState.Finished)
+                    return;
+
+                throw new InvalidOperationException($"Cannot record a disqualification while the match is {currentState}.");
+            }
+
             if (currentState is MatchState.InProgress or MatchState.Paused)
                 return;
 

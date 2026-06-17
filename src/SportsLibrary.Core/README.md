@@ -15,6 +15,7 @@ Important behaviors:
 - Current state of the match (`Scheduled`, `InProgress`, `Finished`, etc.) is determined by timeline events.
 - Score updates come from score payloads (`IScoreEventPayload.Apply`).
 - Winner is calculated through `IMatchResultStrategy`.
+- Disqualifications are a core concept (`IDisqualificationEventPayload`, `Match.Disqualify`) and excluded from winner resolution.
 
 ### Score
 
@@ -39,6 +40,8 @@ Another core concept of this library. Timeline is a list of events that happened
 An event payload is a data structure that contains information about an event that happened during a match. For example, in football, a goal scored event payload would contain information about the player who scored the goal, the time of the goal, etc.
 
 Payloads that bind to a contestant should implement `IContestantEventPayload`. This lets the core `Match` aggregate validate participation without depending on sport-specific payload types.
+
+If a payload disqualifies a contestant, it should implement `IDisqualificationEventPayload`. This enables generic winner filtering and sport-agnostic disqualification queries on `Match`.
 
 ## How to add a new sport
 

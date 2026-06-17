@@ -10,7 +10,10 @@ namespace SportsLibrary.Core
         {
             ArgumentNullException.ThrowIfNull(match);
 
+            var disqualified = DisqualificationResolver.GetDisqualifiedContestants(match);
+
             var ranked = match.Statistics
+                .Where(kv => !disqualified.Contains(kv.Key))
                 .OrderByDescending(kv => kv.Value.GetValue())
                 .ToList();
 
