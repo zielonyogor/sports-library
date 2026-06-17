@@ -17,9 +17,7 @@ namespace SportsLibrary.Football
         public IScore Apply(IScore? current)
         {
             var prev = current as FootballMatchScore;
-            return new FootballMatchScore(
-                goalsScored: (prev?.GoalsScored ?? 0) + 1,
-                result: prev?.Result ?? MatchOutcome.Draw);
+            return new FootballMatchScore(goalsScored: (prev?.GoalsScored ?? 0) + 1);
         }
     }
 }
