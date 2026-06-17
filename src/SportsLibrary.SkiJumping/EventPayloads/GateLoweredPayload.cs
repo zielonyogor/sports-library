@@ -6,7 +6,7 @@ namespace SportsLibrary.SkiJumping
     /// Emitted when the technical delegate lowers the inrun gate during a competition.
     /// All subsequent jumpers receive a positive gate compensation added to their score.
     /// </summary>
-    public sealed class GateLoweredPayload : IContestantEventPayload
+    public sealed class GateLoweredPayload : IGateChangePayload
     {
         /// <summary>Null when the change applies to all remaining jumpers.</summary>
         public IContestant? Contestant { get; init; }

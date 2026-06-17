@@ -7,6 +7,8 @@ namespace SportsLibrary.SkiJumping
         private readonly Dictionary<IContestant, double> _totals = new();
         private readonly Dictionary<IContestant, double> _bestJumps = new();
         private readonly HashSet<IContestant> _disqualified = new();
+        private readonly List<IGateChangePayload> _gateChanges = new();
+        private float _currentGateCompensation = 0f;
 
         public SkiJumpMatchTracker(Match match)
         {
@@ -32,12 +34,32 @@ namespace SportsLibrary.SkiJumping
             return _disqualified.Contains(contestant);
         }
 
+        /// <summary>
+        /// Gets the current gate compensation that applies to subsequent jumpers.
+        /// </summary>
+        public float GetCurrentGateCompensation()
+        {
+            return _currentGateCompensation;
+        }
+
+        /// <summary>
+        /// Gets the history of all gate changes that occurred during the match.
+        /// </summary>
+        public IReadOnlyList<IGateChangePayload> GetGateChangeHistory()
+        {
+            return _gateChanges.AsReadOnly();
+        }
+
         public void OnEventRecorded(IInGameEvent gameEvent)
         {
             ArgumentNullException.ThrowIfNull(gameEvent);
 
             switch (gameEvent.GetEvent())
             {
+                case IGateChangePayload gateChange:
+                    _currentGateCompensation = gateChange.CompensationPerJump;
+                    _gateChanges.Add(gateChange);
+                    break;
                 case SkiJumpPayload { Contestant: not null } jump:
                     var points = jump.Score?.GetValue() ?? 0;
                     _totals[jump.Contestant] = _totals.GetValueOrDefault(jump.Contestant) + points;
