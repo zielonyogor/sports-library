@@ -95,7 +95,7 @@ public class SkiJumpMatchControllerTests
         match.RecordEvent(new InGameEvent(t, new SkiJumpPayload { Contestant = kamil, Score = new SkiJumpingScore(130f, 57f, 0f, 2f) }));
 
         var ctrl = new SkiJumpMatchController(match);
-        Assert.That(ctrl.GetCurrentGateCompensation(), Is.EqualTo(2f).Within(0.001f));
+        Assert.That(ctrl.GetCurrentGateCompensation(), Is.EqualTo(0f).Within(0.001f));
     }
 
     [Test]
@@ -127,6 +127,19 @@ public class SkiJumpMatchControllerTests
     }
 
     [Test]
+    public void GetCurrentGateCompensation_AfterGateHigher_ReturnsNegativeCompensation()
+    {
+        var kamil = C("Kamil");
+        var t = DateTime.Now;
+        var match = new Match("Finals", new[] { kamil }, t.AddMinutes(-2));
+        match.Start(t.AddMinutes(-1));
+        match.RecordEvent(new InGameEvent(t, new GateHigherPayload { NewGate = 14, GatesRaised = 2, CompensationPerJump = -7.2f }));
+
+        var ctrl = new SkiJumpMatchController(match);
+        Assert.That(ctrl.GetCurrentGateCompensation(), Is.EqualTo(-7.2f).Within(0.001f));
+    }
+
+    [Test]
     public void GetGateChangeHistory_NoChanges_ReturnsEmptyList()
     {
         var kamil = C("Kamil");
@@ -150,6 +163,25 @@ public class SkiJumpMatchControllerTests
         Assert.That(history, Has.Count.EqualTo(2));
         Assert.That(history[0].CompensationPerJump, Is.EqualTo(3.6f).Within(0.001f));
         Assert.That(history[1].CompensationPerJump, Is.EqualTo(7.2f).Within(0.001f));
+    }
+
+    [Test]
+    public void GetGateChangeHistory_WithLowerAndHigherPayloads_ReturnsBoth()
+    {
+        var kamil = C("Kamil");
+        var t = DateTime.Now;
+        var match = new Match("Finals", new[] { kamil }, t.AddMinutes(-2));
+        match.Start(t.AddMinutes(-1));
+        match.RecordEvent(new InGameEvent(t, new GateLoweredPayload { NewGate = 13, GatesLowered = 1, CompensationPerJump = 3.6f }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(3), new GateHigherPayload { NewGate = 14, GatesRaised = 1, CompensationPerJump = -3.6f }));
+
+        var ctrl = new SkiJumpMatchController(match);
+        var history = ctrl.GetGateChangeHistory();
+
+        Assert.That(history, Has.Count.EqualTo(2));
+        Assert.That(history[0], Is.TypeOf<GateLoweredPayload>());
+        Assert.That(history[1], Is.TypeOf<GateHigherPayload>());
+        Assert.That(history[1].CompensationPerJump, Is.EqualTo(-3.6f).Within(0.001f));
     }
 
     [Test]

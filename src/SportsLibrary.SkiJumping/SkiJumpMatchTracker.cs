@@ -7,7 +7,7 @@ namespace SportsLibrary.SkiJumping
         private readonly Dictionary<IContestant, double> _totals = new();
         private readonly Dictionary<IContestant, double> _bestJumps = new();
         private readonly HashSet<IContestant> _disqualified = new();
-        private readonly List<GateLoweredPayload> _gateChanges = new();
+        private readonly List<IGateChangePayload> _gateChanges = new();
         private float _currentGateCompensation = 0f;
 
         public SkiJumpMatchTracker(Match match)
@@ -45,7 +45,7 @@ namespace SportsLibrary.SkiJumping
         /// <summary>
         /// Gets the history of all gate changes that occurred during the match.
         /// </summary>
-        public IReadOnlyList<GateLoweredPayload> GetGateChangeHistory()
+        public IReadOnlyList<IGateChangePayload> GetGateChangeHistory()
         {
             return _gateChanges.AsReadOnly();
         }
@@ -56,9 +56,9 @@ namespace SportsLibrary.SkiJumping
 
             switch (gameEvent.GetEvent())
             {
-                case GateLoweredPayload gate:
-                    _currentGateCompensation = gate.CompensationPerJump;
-                    _gateChanges.Add(gate);
+                case IGateChangePayload gateChange:
+                    _currentGateCompensation = gateChange.CompensationPerJump;
+                    _gateChanges.Add(gateChange);
                     break;
                 case SkiJumpPayload { Contestant: not null } jump:
                     var points = jump.Score?.GetValue() ?? 0;

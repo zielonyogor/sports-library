@@ -48,6 +48,24 @@ public class GateLoweredTimelineTests
         Assert.That(payload.Referee, Is.SameAs(judge));
     }
 
+    [Test]
+    public void GateHigherPayload_ExposesGateDataAndReferee()
+    {
+        var judge = GateJudge();
+        var payload = new GateHigherPayload
+        {
+            NewGate = 12,
+            GatesRaised = 2,
+            CompensationPerJump = -7.2f,
+            Referee = judge,
+        };
+
+        Assert.That(payload.NewGate, Is.EqualTo(12));
+        Assert.That(payload.GatesRaised, Is.EqualTo(2));
+        Assert.That(payload.CompensationPerJump, Is.EqualTo(-7.2f).Within(0.001f));
+        Assert.That(payload.Referee, Is.SameAs(judge));
+    }
+
     // ── mixed-event timeline scenarios ───────────────────────────────────────
 
     [Test]
@@ -152,11 +170,12 @@ public class GateLoweredTimelineTests
         var match = new Match("Competition", new[] { a, b }, t.AddMinutes(-1));
         match.Start(t);
 
-        // 3 jumps, 2 gate changes
+        // 3 jumps, 3 gate changes
         match.RecordEvent(new InGameEvent(t.AddMinutes(0), new SkiJumpPayload { Contestant = a }));
         match.RecordEvent(new InGameEvent(t.AddMinutes(3), new GateLoweredPayload { NewGate = 13, GatesLowered = 1 }));
         match.RecordEvent(new InGameEvent(t.AddMinutes(6), new SkiJumpPayload { Contestant = b }));
         match.RecordEvent(new InGameEvent(t.AddMinutes(9), new GateLoweredPayload { NewGate = 11, GatesLowered = 2 }));
+        match.RecordEvent(new InGameEvent(t.AddMinutes(10), new GateHigherPayload { NewGate = 12, GatesRaised = 1, CompensationPerJump = -3.6f }));
         match.RecordEvent(new InGameEvent(t.AddMinutes(12), new SkiJumpPayload { Contestant = a }));
 
         int jumps = 0, gateChanges = 0;
@@ -166,10 +185,11 @@ public class GateLoweredTimelineTests
             {
                 case SkiJumpPayload: jumps++; break;
                 case GateLoweredPayload: gateChanges++; break;
+                case GateHigherPayload: gateChanges++; break;
             }
         }
 
         Assert.That(jumps, Is.EqualTo(3));
-        Assert.That(gateChanges, Is.EqualTo(2));
+        Assert.That(gateChanges, Is.EqualTo(3));
     }
 }

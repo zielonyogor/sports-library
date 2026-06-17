@@ -31,7 +31,7 @@ namespace SportsLibrary.SkiJumping
         /// <summary>
         /// Gets the history of all gate changes that occurred during the match.
         /// </summary>
-        public IReadOnlyList<GateLoweredPayload> GetGateChangeHistory() => _tracker.GetGateChangeHistory();
+        public IReadOnlyList<IGateChangePayload> GetGateChangeHistory() => _tracker.GetGateChangeHistory();
 
         /// <summary>
         /// Creates a SkiJumpingScore with the current gate compensation automatically applied.
